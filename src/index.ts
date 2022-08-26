@@ -1,25 +1,17 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import dotenv from "dotenv";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import dashboardRouter from "./routes/dashboard";
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT;
 
-app.get("/", async (_: Request, res: Response) => {
-  const allBooksByAuthor = await prisma.book_tbl.findMany({
-    where: {
-      author_name: 4,
-    },
-  });
+app.use(express.json());
 
-  res.json(allBooksByAuthor);
-});
+app.use("/dashboard", dashboardRouter);
 
-app.listen(port, () => {
+app.listen(8080, () => {
   console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);
 });
