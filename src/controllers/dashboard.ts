@@ -9,7 +9,7 @@ import { bookTypes } from "../utils/globals";
 const prisma = new PrismaClient();
 
 export const getBasicDetails = async (req: Request, res: Response) => {
-  const authorIds = getAuthorIds(req.body.authorIds);
+  const authorIds = await getAuthorIds(req.body.copyrightOwner);
 
   let result: any = [];
 
@@ -91,7 +91,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
 };
 
 export const getChannelBooks = async (req: Request, res: Response) => {
-  const authorIds = getAuthorIds(req.body.authorIds);
+  const authorIds = await getAuthorIds(req.body.copyrightOwner);
 
   const result: any = [];
 
