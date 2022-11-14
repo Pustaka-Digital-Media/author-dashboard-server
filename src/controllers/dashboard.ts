@@ -181,6 +181,14 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     });
     booksData["audiobooks"]["pustaka"] = pustakaAudiobooksCount;
 
+    const paperbackCount = await prisma.book_tbl.count({
+      where: {
+        author_name: authorId,
+        paper_back_flag: 1,
+      },
+    });
+    booksData["paperback"] = paperbackCount;
+
     result.push({
       name: authorName,
       data: booksData,
