@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://root:rohan123@127.0.0.1:3306/pustaka"
 }
 
 model amazon_books {
@@ -39,7 +39,8 @@ model amazon_books {
   keywords               String?   @db.VarChar(45)
   asin                   String    @db.VarChar(15)
   amazon_url             String?   @db.VarChar(100)
-  book_id                Int
+  book                   book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id                Int       @unique
   author_id              Int
   copyright_owner        Int?
   language_id            Int
@@ -178,36 +179,36 @@ model author_royalty_details {
 }
 
 model author_tbl {
-  author_id                 Int               @id @default(autoincrement())
-  author_name               String            @db.VarChar(100)
-  url_name                  String?           @db.VarChar(100)
+  author_id                 Int       @id @default(autoincrement())
+  author_name               String    @db.VarChar(100)
+  url_name                  String?   @db.VarChar(100)
   author_type               Int?
-  author_image              String?           @db.VarChar(200)
-  copy_right_owner_name     String            @db.VarChar(100)
-  relationship              String            @db.VarChar(40)
-  mobile                    String?           @db.VarChar(15)
-  phone                     String?           @db.VarChar(15)
-  email                     String?           @db.VarChar(40)
-  address                   String?           @db.Text
-  fb_url                    String?           @db.VarChar(2048)
-  twitter_url               String?           @db.VarChar(2048)
-  blog_url                  String?           @db.VarChar(2048)
-  description               String?           @db.Text
-  status                    Int               @default(dbgenerated("0"))
-  created_at                DateTime          @default(now()) @db.Timestamp(0)
-  activated_at              DateTime?         @db.Timestamp(0)
+  author_image              String?   @db.VarChar(200)
+  copy_right_owner_name     String    @db.VarChar(100)
+  relationship              String    @db.VarChar(40)
+  mobile                    String?   @db.VarChar(15)
+  phone                     String?   @db.VarChar(15)
+  email                     String?   @db.VarChar(40)
+  address                   String?   @db.Text
+  fb_url                    String?   @db.VarChar(2048)
+  twitter_url               String?   @db.VarChar(2048)
+  blog_url                  String?   @db.VarChar(2048)
+  description               String?   @db.Text
+  status                    Int       @default(dbgenerated("0"))
+  created_at                DateTime  @default(now()) @db.Timestamp(0)
+  activated_at              DateTime? @db.Timestamp(0)
   created_by                Int
-  gender                    String            @db.Char(1)
+  gender                    String    @db.Char(1)
   copyright_owner           Int?
   user_id                   Int
   narrator_id               Int?
-  amazon_link               String?           @db.VarChar(200)
-  scribd_link               String?           @db.VarChar(200)
-  googlebooks_link          String?           @db.VarChar(200)
-  storytel_link             String?           @db.VarChar(200)
-  overdrive_link            String?           @db.VarChar(200)
-  pinterest_link            String?           @db.VarChar(200)
-  agreement_details         String?           @db.Text
+  amazon_link               String?   @db.VarChar(200)
+  scribd_link               String?   @db.VarChar(200)
+  googlebooks_link          String?   @db.VarChar(200)
+  storytel_link             String?   @db.VarChar(200)
+  overdrive_link            String?   @db.VarChar(200)
+  pinterest_link            String?   @db.VarChar(200)
+  agreement_details         String?   @db.Text
   agreement_ebook_count     Int?
   agreement_audiobook_count Int?
   agreement_paperback_count Int?
@@ -287,16 +288,22 @@ model book_tbl {
   paper_back_isbn            String?   @db.VarChar(20)
   paper_back_remarks         String?   @db.Text
   mintbook_cost              Int?
+
+  amazonBookId    amazon_books?
+  scribdBookId    scribd_books?
+  googleBookId    google_books?
+  storytelBookId  storytel_books?
+  overdriveBookId overdrive_books?
 }
 
 model book_types {
-  book_type_id Int               @id @default(autoincrement())
-  type_name    String            @db.VarChar(50)
-  url_name     String            @db.VarChar(250)
-  status       Int               @default(dbgenerated("0"))
-  created_at   DateTime          @db.DateTime(0)
-  updated_at   DateTime          @db.DateTime(0)
-  image_url    String?           @db.VarChar(45)
+  book_type_id Int      @id @default(autoincrement())
+  type_name    String   @db.VarChar(50)
+  url_name     String   @db.VarChar(250)
+  status       Int      @default(dbgenerated("0"))
+  created_at   DateTime @db.DateTime(0)
+  updated_at   DateTime @db.DateTime(0)
+  image_url    String?  @db.VarChar(45)
 }
 
 model books_metadata {
@@ -425,19 +432,19 @@ model free_book_subscription {
 }
 
 model genre_details_tbl {
-  genre_id   Int                      @id @default(autoincrement())
+  genre_id   Int     @id @default(autoincrement())
   admin_id   Int
-  genre_name String                   @db.VarChar(50)
-  url_name   String                   @db.VarChar(250)
-  lang_0     String?                  @db.VarChar(30)
-  lang_1     String                   @default("0") @db.VarChar(30)
-  lang_2     String                   @default("0") @db.VarChar(30)
-  lang_3     String                   @default("0") @db.VarChar(30)
-  lang_4     String                   @default("0") @db.VarChar(30)
-  lang_5     String?                  @db.VarChar(30)
-  status     Int                      @default(dbgenerated("0"))
-  bisac_code String?                  @db.VarChar(45)
-  image_url  String?                  @db.VarChar(45)
+  genre_name String  @db.VarChar(50)
+  url_name   String  @db.VarChar(250)
+  lang_0     String? @db.VarChar(30)
+  lang_1     String  @default("0") @db.VarChar(30)
+  lang_2     String  @default("0") @db.VarChar(30)
+  lang_3     String  @default("0") @db.VarChar(30)
+  lang_4     String  @default("0") @db.VarChar(30)
+  lang_5     String? @db.VarChar(30)
+  status     Int     @default(dbgenerated("0"))
+  bisac_code String? @db.VarChar(45)
+  image_url  String? @db.VarChar(45)
 }
 
 model google_books {
@@ -496,7 +503,8 @@ model google_books {
   eur_price_excluding_tax     Int?
   eur_countries_including_tax String?   @db.Text
   eur_countries_excluding_tax String?   @db.Text
-  book_id                     Int?
+  book                        book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id                     Int       @unique
   author_id                   Int?
   copyright_owner             Int?
   language_id                 Int?
@@ -577,15 +585,15 @@ model kobo_transaction {
 }
 
 model language_tbl {
-  language_id            Int                 @id @default(autoincrement())
+  language_id            Int      @id @default(autoincrement())
   admin_id               Int
-  language_name          String              @db.VarChar(100)
-  regional_language_name String              @db.VarChar(20)
-  url_name               String?             @db.VarChar(45)
-  image_url              String?             @db.VarChar(45)
-  status                 Int                 @default(dbgenerated("0"))
-  created_at             DateTime            @db.DateTime(0)
-  updated_at             DateTime            @db.DateTime(0)
+  language_name          String   @db.VarChar(100)
+  regional_language_name String   @db.VarChar(20)
+  url_name               String?  @db.VarChar(45)
+  image_url              String?  @db.VarChar(45)
+  status                 Int      @default(dbgenerated("0"))
+  created_at             DateTime @db.DateTime(0)
+  updated_at             DateTime @db.DateTime(0)
 }
 
 model ledger_head_tbl {
@@ -706,7 +714,8 @@ model overdrive_books {
   sample_link      String    @db.VarChar(100)
   readbox_enabled  String?   @db.VarChar(100)
   special_features String?   @db.VarChar(100)
-  book_id          Int
+  book             book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id          Int       @unique
   author_id        Int
   copyright_owner  Int?
   language_id      Int
@@ -918,7 +927,8 @@ model scribd_books {
   conversion_status         String?  @db.VarChar(100)
   product_page_pending      String?  @db.VarChar(100)
   subscription_pending      String?  @db.VarChar(100)
-  book_id                   Int
+  book                      book_tbl @relation(fields: [book_id], references: [book_id])
+  book_id                   Int      @unique
   author_id                 Int
   copyright_owner           Int?
   language_id               Int
@@ -967,7 +977,8 @@ model storytel_books {
   narrator         String?   @db.VarChar(100)
   category         String?   @db.VarChar(45)
   publication_date DateTime? @db.Date
-  book_id          Int?
+  book             book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id          Int       @unique
   author_id        Int?
   copyright_owner  Int?
   language_id      Int?

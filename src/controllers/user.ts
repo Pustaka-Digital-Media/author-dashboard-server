@@ -14,14 +14,15 @@ export const login = async (req: Request, res: Response) => {
     },
   });
 
-  const author = await prisma.author_tbl.findFirst({
+  const authors = await prisma.author_tbl.findMany({
     where: {
       user_id: authorUser?.user_id,
     },
   });
 
-  if (author && author.author_id) {
-    res.json({ status: 1, authorId: author?.author_id });
+  if (authors) {
+    const authorIds = authors.map((item) => item.author_id);
+    res.json({ status: 1, authorIds: authorIds });
   } else {
     res.json({ status: 0 });
   }
