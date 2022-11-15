@@ -11,18 +11,15 @@ export const login = async (req: Request, res: Response) => {
     where: {
       email: userData.email,
       password: md5(userData.password),
+      user_type: "2",
+    },
+    select: {
+      user_id: true,
     },
   });
 
-  const authors = await prisma.author_tbl.findMany({
-    where: {
-      user_id: authorUser?.user_id,
-    },
-  });
-
-  if (authors) {
-    const authorIds = authors.map((item) => item.author_id);
-    res.json({ status: 1, authorIds: authorIds });
+  if (authorUser) {
+    res.json({ status: 1, copyrightOwner: authorUser.user_id });
   } else {
     res.json({ status: 0 });
   }
