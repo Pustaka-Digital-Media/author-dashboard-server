@@ -18,7 +18,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
     let authorData: any = { ebooks: {}, audiobooks: {}, paperback: {} };
 
     // Author Name
-    const authorName = getAuthorName(authorId);
+    const authorName = await getAuthorName(authorId);
     authorData.authorName = authorName;
 
     // eBook Count and Pages
@@ -103,7 +103,7 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     booksData["audiobooks"] = {};
 
     // Author Name
-    const authorName = getAuthorName(authorId);
+    const authorName = await getAuthorName(authorId);
 
     for (let i = 0; i < bookTypes.length; i++) {
       const bookType = bookTypes[i];
