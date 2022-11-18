@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import getAuthorIds from "../utils/getAuthorIds";
 import getAuthorName from "../utils/getAuthorName";
 
-import { bookTypes } from "../utils/globals";
+import { bookTypes, S3_URL } from "../utils/globals";
 
 const prisma = new PrismaClient();
 
@@ -37,8 +37,8 @@ export const getBasicDetails = async (req: Request, res: Response) => {
         type_of_book: 1,
       },
     });
-    authorData.ebooks.ebook_count = authorEbookCount;
-    authorData.ebooks.ebook_pages = authorEbookPages._sum.number_of_page;
+    authorData.ebooks.count = authorEbookCount;
+    authorData.ebooks.pages = authorEbookPages._sum.number_of_page;
 
     // Audiobook Count and Pages
     const authorAudiobookCount = await prisma.book_tbl.count({
@@ -56,9 +56,8 @@ export const getBasicDetails = async (req: Request, res: Response) => {
         type_of_book: 3,
       },
     });
-    authorData.audiobooks.audiobook_count = authorAudiobookCount;
-    authorData.audiobooks.audiobook_pages =
-      authorAudiobookPages._sum.number_of_page;
+    authorData.audiobooks.count = authorAudiobookCount;
+    authorData.audiobooks.pages = authorAudiobookPages._sum.number_of_page;
 
     // Paperback Count and Pages
     const authorPaperbackCount = await prisma.book_tbl.count({
@@ -78,8 +77,8 @@ export const getBasicDetails = async (req: Request, res: Response) => {
         paper_back_flag: 1,
       },
     });
-    authorData.paperback.ebook_count = authorPaperbackCount;
-    authorData.paperback.ebook_pages = authorPaperbackPages._sum.number_of_page;
+    authorData.paperback.count = authorPaperbackCount;
+    authorData.paperback.pages = authorPaperbackPages._sum.number_of_page;
 
     result.push({
       name: authorName,
@@ -117,7 +116,10 @@ export const getChannelBooks = async (req: Request, res: Response) => {
           },
         },
       });
-      booksData[bookType.name]["amazon"] = amazonBooksCount;
+      booksData[bookType.name]["amazon"] = {};
+      booksData[bookType.name]["amazon"]["name"] = "Amazon";
+      booksData[bookType.name]["amazon"]["count"] = amazonBooksCount;
+      booksData[bookType.name]["amazon"]["url"] = S3_URL + "/amazon-icon.svg";
 
       // Scribd
       const scribdBooksCount = await prisma.scribd_books.count({
@@ -128,7 +130,10 @@ export const getChannelBooks = async (req: Request, res: Response) => {
           },
         },
       });
-      booksData[bookType.name]["scribd"] = scribdBooksCount;
+      booksData[bookType.name]["scribd"] = {};
+      booksData[bookType.name]["scribd"]["name"] = "Scribd";
+      booksData[bookType.name]["scribd"]["count"] = scribdBooksCount;
+      booksData[bookType.name]["scribd"]["url"] = S3_URL + "/scrib-icon.svg";
 
       // Google Books
       const googleBooksCount = await prisma.google_books.count({
@@ -139,7 +144,11 @@ export const getChannelBooks = async (req: Request, res: Response) => {
           },
         },
       });
-      booksData[bookType.name]["google"] = googleBooksCount;
+      booksData[bookType.name]["google"] = {};
+      booksData[bookType.name]["google"]["name"] = "Google";
+      booksData[bookType.name]["google"]["count"] = googleBooksCount;
+      booksData[bookType.name]["google"]["url"] =
+        S3_URL + "/google-books-icon.svg";
 
       // Storytel
       const storytelBooksCount = await prisma.storytel_books.count({
@@ -150,7 +159,11 @@ export const getChannelBooks = async (req: Request, res: Response) => {
           },
         },
       });
-      booksData[bookType.name]["storytel"] = storytelBooksCount;
+      booksData[bookType.name]["storytel"] = {};
+      booksData[bookType.name]["storytel"]["name"] = "Storytel";
+      booksData[bookType.name]["storytel"]["count"] = storytelBooksCount;
+      booksData[bookType.name]["storytel"]["url"] =
+        S3_URL + "/storytel-icon.svg";
 
       // Overdrive
       const overdriveBooksCount = await prisma.overdrive_books.count({
@@ -161,7 +174,11 @@ export const getChannelBooks = async (req: Request, res: Response) => {
           },
         },
       });
-      booksData[bookType.name]["overdrive"] = overdriveBooksCount;
+      booksData[bookType.name]["overdrive"] = {};
+      booksData[bookType.name]["overdrive"]["name"] = "Overdrive";
+      booksData[bookType.name]["overdrive"]["count"] = overdriveBooksCount;
+      booksData[bookType.name]["overdrive"]["url"] =
+        S3_URL + "/overdrive-icon.svg";
     }
 
     // Pustaka
@@ -171,7 +188,10 @@ export const getChannelBooks = async (req: Request, res: Response) => {
         type_of_book: 1,
       },
     });
-    booksData["ebooks"]["pustaka"] = pustakaEBooksCount;
+    booksData["ebooks"]["pustaka"] = {};
+    booksData["ebooks"]["pustaka"]["name"] = "Pustaka";
+    booksData["ebooks"]["pustaka"]["count"] = pustakaEBooksCount;
+    booksData["ebooks"]["pustaka"]["url"] = S3_URL + "/pustaka-icon.svg";
 
     const pustakaAudiobooksCount = await prisma.book_tbl.count({
       where: {
@@ -179,7 +199,10 @@ export const getChannelBooks = async (req: Request, res: Response) => {
         type_of_book: 3,
       },
     });
-    booksData["audiobooks"]["pustaka"] = pustakaAudiobooksCount;
+    booksData["audiobooks"]["pustaka"] = {};
+    booksData["audiobooks"]["pustaka"]["name"] = "Pustaka";
+    booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
+    booksData["audiobooks"]["pustaka"]["url"] = S3_URL + "/pustaka-icon.svg";
 
     const paperbackCount = await prisma.book_tbl.count({
       where: {
