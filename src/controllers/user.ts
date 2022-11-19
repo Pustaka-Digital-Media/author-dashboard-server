@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import md5 from "md5";
 
 import getAuthorIds from "../utils/getAuthorIds";
+import getAuthorName from "../utils/getAuthorName";
 
 const prisma = new PrismaClient();
 
@@ -20,15 +21,26 @@ export const login = async (req: Request, res: Response) => {
     },
   });
 
+  const authorIdData = [];
+  const authorIds = await getAuthorIds(authorUser!.user_id.toString());
+
+  for (let i = 0; i < authorIds.length; i++) {
+    const authorId = authorIds[i];
+    const authorName = await getAuthorName(authorId);
+
+    authorIdData.push({
+      author_id: authorId,
+      author_name: authorName,
+    });
+  }
+
   if (authorUser) {
-    res.json({ status: 1, copyrightOwner: authorUser.user_id });
+    res.json({
+      status: 1,
+      copyrightOwner: authorUser.user_id,
+      authorIds: authorIdData,
+    });
   } else {
     res.json({ status: 0 });
   }
-};
-
-export const getAuthorIdData = async (req: Request, res: Response) => {
-  const authorIds = await getAuthorIds(req.body.copyrightOwner);
-
-  res.json(authorIds);
 };
