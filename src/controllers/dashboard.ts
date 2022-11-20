@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-import getAuthorIds from "../utils/getAuthorIds";
 import getAuthorName from "../utils/getAuthorName";
 
 import { BOOK_TYPES, S3_URL } from "../utils/globals";
@@ -9,84 +8,76 @@ import { BOOK_TYPES, S3_URL } from "../utils/globals";
 const prisma = new PrismaClient();
 
 export const getBasicDetails = async (req: Request, res: Response) => {
-  const authorIds = await getAuthorIds(req.body.copyrightOwner);
+  const authorId = parseInt(req.body.authorId);
+  let authorData: any = { ebooks: {}, audiobooks: {}, paperback: {} };
 
-  let result: any = [];
+  // Author Name
+  const authorName = await getAuthorName(authorId);
+  authorData.authorName = authorName;
 
-  for (let i = 0; i < authorIds.length; i++) {
-    const authorId = authorIds[i];
-    let authorData: any = { ebooks: {}, audiobooks: {}, paperback: {} };
+  // eBook Count and Pages
+  const authorEbookCount = await prisma.book_tbl.count({
+    where: {
+      author_name: authorId,
+      type_of_book: 1,
+    },
+  });
+  const authorEbookPages = await prisma.book_tbl.aggregate({
+    _sum: {
+      number_of_page: true,
+    },
+    where: {
+      author_name: authorId,
+      type_of_book: 1,
+    },
+  });
+  authorData.ebooks.count = authorEbookCount;
+  authorData.ebooks.pages = authorEbookPages._sum.number_of_page;
 
-    // Author Name
-    const authorName = await getAuthorName(authorId);
-    authorData.authorName = authorName;
+  // Audiobook Count and Pages
+  const authorAudiobookCount = await prisma.book_tbl.count({
+    where: {
+      author_name: authorId,
+      type_of_book: 3,
+    },
+  });
+  const authorAudiobookPages = await prisma.book_tbl.aggregate({
+    _sum: {
+      number_of_page: true,
+    },
+    where: {
+      author_name: authorId,
+      type_of_book: 3,
+    },
+  });
+  authorData.audiobooks.count = authorAudiobookCount;
+  authorData.audiobooks.pages = authorAudiobookPages._sum.number_of_page;
 
-    // eBook Count and Pages
-    const authorEbookCount = await prisma.book_tbl.count({
-      where: {
-        author_name: authorId,
-        type_of_book: 1,
-      },
-    });
-    const authorEbookPages = await prisma.book_tbl.aggregate({
-      _sum: {
-        number_of_page: true,
-      },
-      where: {
-        author_name: authorId,
-        type_of_book: 1,
-      },
-    });
-    authorData.ebooks.count = authorEbookCount;
-    authorData.ebooks.pages = authorEbookPages._sum.number_of_page;
+  // Paperback Count and Pages
+  const authorPaperbackCount = await prisma.book_tbl.count({
+    where: {
+      author_name: authorId,
+      type_of_book: 1,
+      paper_back_flag: 1,
+    },
+  });
+  const authorPaperbackPages = await prisma.book_tbl.aggregate({
+    _sum: {
+      number_of_page: true,
+    },
+    where: {
+      author_name: authorId,
+      type_of_book: 1,
+      paper_back_flag: 1,
+    },
+  });
+  authorData.paperback.count = authorPaperbackCount;
+  authorData.paperback.pages = authorPaperbackPages._sum.number_of_page;
 
-    // Audiobook Count and Pages
-    const authorAudiobookCount = await prisma.book_tbl.count({
-      where: {
-        author_name: authorId,
-        type_of_book: 3,
-      },
-    });
-    const authorAudiobookPages = await prisma.book_tbl.aggregate({
-      _sum: {
-        number_of_page: true,
-      },
-      where: {
-        author_name: authorId,
-        type_of_book: 3,
-      },
-    });
-    authorData.audiobooks.count = authorAudiobookCount;
-    authorData.audiobooks.pages = authorAudiobookPages._sum.number_of_page;
-
-    // Paperback Count and Pages
-    const authorPaperbackCount = await prisma.book_tbl.count({
-      where: {
-        author_name: authorId,
-        type_of_book: 1,
-        paper_back_flag: 1,
-      },
-    });
-    const authorPaperbackPages = await prisma.book_tbl.aggregate({
-      _sum: {
-        number_of_page: true,
-      },
-      where: {
-        author_name: authorId,
-        type_of_book: 1,
-        paper_back_flag: 1,
-      },
-    });
-    authorData.paperback.count = authorPaperbackCount;
-    authorData.paperback.pages = authorPaperbackPages._sum.number_of_page;
-
-    result.push({
-      name: authorName,
-      data: authorData,
-    });
-  }
-
-  res.json(result);
+  res.json({
+    name: authorName,
+    data: authorData,
+  });
 };
 
 export const getChannelBooks = async (req: Request, res: Response) => {
