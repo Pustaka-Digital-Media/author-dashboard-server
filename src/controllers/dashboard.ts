@@ -51,7 +51,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
     },
   });
   authorData.audiobooks.count = authorAudiobookCount;
-  authorData.audiobooks.pages = authorAudiobookPages._sum.number_of_page;
+  authorData.audiobooks.pages = authorAudiobookPages._sum.number_of_page || 0;
 
   // Paperback Count and Pages
   const authorPaperbackCount = await prisma.book_tbl.count({
@@ -72,7 +72,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
     },
   });
   authorData.paperback.count = authorPaperbackCount;
-  authorData.paperback.pages = authorPaperbackPages._sum.number_of_page;
+  authorData.paperback.pages = authorPaperbackPages._sum.number_of_page || 0;
 
   res.json({
     name: authorName,
@@ -90,22 +90,69 @@ export const getChannelBooks = async (req: Request, res: Response) => {
   // Author Name
   const authorName = await getAuthorName(authorId);
 
+  // Pustaka
+  const pustakaEBooksCount = await prisma.book_tbl.count({
+    where: {
+      author_name: authorId,
+      type_of_book: 1,
+    },
+  });
+  booksData["ebooks"]["pustaka"] = {};
+  booksData["ebooks"]["pustaka"]["name"] = "Pustaka";
+  booksData["ebooks"]["pustaka"]["count"] = pustakaEBooksCount;
+  booksData["ebooks"]["pustaka"]["url"] = S3_URL + "/pustaka-icon.svg";
+
+  const pustakaAudiobooksCount = await prisma.book_tbl.count({
+    where: {
+      author_name: authorId,
+      type_of_book: 3,
+    },
+  });
+  booksData["audiobooks"]["pustaka"] = {};
+  booksData["audiobooks"]["pustaka"]["name"] = "Pustaka";
+  booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
+  booksData["audiobooks"]["pustaka"]["url"] = S3_URL + "/pustaka-icon.svg";
+
+  const paperbackCount = await prisma.book_tbl.count({
+    where: {
+      author_name: authorId,
+      paper_back_flag: 1,
+    },
+  });
+  booksData["paperback"] = paperbackCount;
+
   for (let i = 0; i < BOOK_TYPES.length; i++) {
     const bookType = BOOK_TYPES[i];
 
-    // Amazon
-    const amazonBooksCount = await prisma.amazon_books.count({
-      where: {
-        author_id: authorId,
-        book: {
-          type_of_book: bookType.id,
+    if (bookType.id === 3) {
+      // Audible
+      const audibleBooksCount = await prisma.audible_books.count({
+        where: {
+          author_id: authorId,
+          book: {
+            type_of_book: bookType.id,
+          },
         },
-      },
-    });
-    booksData[bookType.name]["amazon"] = {};
-    booksData[bookType.name]["amazon"]["name"] = "Amazon";
-    booksData[bookType.name]["amazon"]["count"] = amazonBooksCount;
-    booksData[bookType.name]["amazon"]["url"] = S3_URL + "/amazon-icon.svg";
+      });
+      booksData[bookType.name]["audible"] = {};
+      booksData[bookType.name]["audible"]["name"] = "Audible";
+      booksData[bookType.name]["audible"]["count"] = audibleBooksCount;
+      booksData[bookType.name]["audible"]["url"] = S3_URL + "/amazon-icon.svg";
+    } else {
+      // Amazon
+      const amazonBooksCount = await prisma.amazon_books.count({
+        where: {
+          author_id: authorId,
+          book: {
+            type_of_book: bookType.id,
+          },
+        },
+      });
+      booksData[bookType.name]["amazon"] = {};
+      booksData[bookType.name]["amazon"]["name"] = "Amazon";
+      booksData[bookType.name]["amazon"]["count"] = amazonBooksCount;
+      booksData[bookType.name]["amazon"]["url"] = S3_URL + "/amazon-icon.svg";
+    }
 
     // Scribd
     const scribdBooksCount = await prisma.scribd_books.count({
@@ -165,37 +212,6 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     booksData[bookType.name]["overdrive"]["url"] =
       S3_URL + "/overdrive-icon.svg";
   }
-
-  // Pustaka
-  const pustakaEBooksCount = await prisma.book_tbl.count({
-    where: {
-      author_name: authorId,
-      type_of_book: 1,
-    },
-  });
-  booksData["ebooks"]["pustaka"] = {};
-  booksData["ebooks"]["pustaka"]["name"] = "Pustaka";
-  booksData["ebooks"]["pustaka"]["count"] = pustakaEBooksCount;
-  booksData["ebooks"]["pustaka"]["url"] = S3_URL + "/pustaka-icon.svg";
-
-  const pustakaAudiobooksCount = await prisma.book_tbl.count({
-    where: {
-      author_name: authorId,
-      type_of_book: 3,
-    },
-  });
-  booksData["audiobooks"]["pustaka"] = {};
-  booksData["audiobooks"]["pustaka"]["name"] = "Pustaka";
-  booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
-  booksData["audiobooks"]["pustaka"]["url"] = S3_URL + "/pustaka-icon.svg";
-
-  const paperbackCount = await prisma.book_tbl.count({
-    where: {
-      author_name: authorId,
-      paper_back_flag: 1,
-    },
-  });
-  booksData["paperback"] = paperbackCount;
 
   res.json({
     name: authorName,

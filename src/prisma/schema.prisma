@@ -96,7 +96,8 @@ model audible_books {
   narrators         String?   @db.VarChar(100)
   first_online_date DateTime? @db.Date
   language_id       Int?
-  book_id           Int?
+  book              book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id           Int       @unique
   author_id         Int?
   copyright_owner   Int?
 }
@@ -294,6 +295,7 @@ model book_tbl {
   googleBookId    google_books?
   storytelBookId  storytel_books?
   overdriveBookId overdrive_books?
+  audibleBookId   audible_books?
 }
 
 model book_types {
