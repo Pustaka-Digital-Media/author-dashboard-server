@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 export const getLanguageGraphData = async (req: Request, res: Response) => {
   const graphData: any = {};
   const authorId = parseInt(req.body.authorId);
+  const typeOfBook = parseInt(req.body.typeOfBook);
 
   const authorName = await getAuthorName(authorId);
 
@@ -29,12 +30,34 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
   for (let j = 0; j < languages.length; j++) {
     const language = languages[j];
 
-    const languageCount = await prisma.book_tbl.count({
-      where: {
-        author_name: authorId,
-        language: language.language_id,
-      },
-    });
+    let languageCount: number;
+    if (typeOfBook && typeOfBook > 0) {
+      if (typeOfBook === 4) {
+        languageCount = await prisma.book_tbl.count({
+          where: {
+            author_name: authorId,
+            language: language.language_id,
+            type_of_book: 1,
+            paper_back_flag: 1,
+          },
+        });
+      } else {
+        languageCount = await prisma.book_tbl.count({
+          where: {
+            author_name: authorId,
+            language: language.language_id,
+            type_of_book: typeOfBook,
+          },
+        });
+      }
+    } else {
+      languageCount = await prisma.book_tbl.count({
+        where: {
+          author_name: authorId,
+          language: language.language_id,
+        },
+      });
+    }
 
     if (languageCount > 0) {
       graphData[language.language_name] = {};
@@ -56,6 +79,7 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
 export const getGenreGraphData = async (req: Request, res: Response) => {
   const graphData: any = {};
   const authorId = parseInt(req.body.authorId);
+  const typeOfBook = parseInt(req.body.typeOfBook);
 
   const authorName = await getAuthorName(authorId);
 
@@ -70,12 +94,34 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
   for (let j = 0; j < genres.length; j++) {
     const genre = genres[j];
 
-    const genreCount = await prisma.book_tbl.count({
-      where: {
-        author_name: authorId,
-        genre_id: genre.genre_id,
-      },
-    });
+    let genreCount: number;
+    if (typeOfBook && typeOfBook > 0) {
+      if (typeOfBook === 4) {
+        genreCount = await prisma.book_tbl.count({
+          where: {
+            author_name: authorId,
+            genre_id: genre.genre_id,
+            type_of_book: 1,
+            paper_back_flag: 1,
+          },
+        });
+      } else {
+        genreCount = await prisma.book_tbl.count({
+          where: {
+            author_name: authorId,
+            genre_id: genre.genre_id,
+            type_of_book: typeOfBook,
+          },
+        });
+      }
+    } else {
+      genreCount = await prisma.book_tbl.count({
+        where: {
+          author_name: authorId,
+          genre_id: genre.genre_id,
+        },
+      });
+    }
 
     if (genreCount > 0) {
       graphData[genre.genre_name] = {};

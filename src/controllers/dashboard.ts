@@ -87,6 +87,7 @@ export const getChannelBooks = async (req: Request, res: Response) => {
   let booksData: any = {};
   booksData["ebooks"] = {};
   booksData["audiobooks"] = {};
+  booksData["paperback"] = {};
 
   // Author Name
   const authorName = await getAuthorName(authorId);
@@ -125,7 +126,10 @@ export const getChannelBooks = async (req: Request, res: Response) => {
         paper_back_flag: 1,
       },
     });
-    booksData["paperback"] = paperbackCount;
+    booksData["paperback"]["pustaka"] = {};
+    booksData["paperback"]["pustaka"]["name"] = "Pustaka";
+    booksData["paperback"]["pustaka"]["count"] = paperbackCount;
+    booksData["paperback"]["pustaka"]["url"] = S3_URL + "/pustaka-icon.svg";
   }
 
   for (let i = 0; i < BOOK_TYPES.length; i++) {
