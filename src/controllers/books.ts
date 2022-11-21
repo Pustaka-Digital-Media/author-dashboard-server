@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-import getAuthorIds from "../utils/getAuthorIds";
 import getAuthorName from "../utils/getAuthorName";
 
 import { COLOR_PALETTE } from "../utils/globals";
@@ -26,6 +25,7 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
     },
   });
 
+  let colorIndex = 0;
   for (let j = 0; j < languages.length; j++) {
     const language = languages[j];
 
@@ -41,7 +41,9 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
       graphData[language.language_name]["name"] = language.language_name;
       graphData[language.language_name]["count"] = languageCount;
       graphData[language.language_name]["bg_color"] =
-        COLOR_PALETTE[j % COLOR_PALETTE.length];
+        COLOR_PALETTE[colorIndex % COLOR_PALETTE.length];
+
+      colorIndex++;
     }
   }
 
@@ -64,6 +66,7 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
     },
   });
 
+  let colorIndex = 0;
   for (let j = 0; j < genres.length; j++) {
     const genre = genres[j];
 
@@ -79,7 +82,9 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
       graphData[genre.genre_name]["name"] = genre.genre_name;
       graphData[genre.genre_name]["count"] = genreCount;
       graphData[genre.genre_name]["bg_color"] =
-        COLOR_PALETTE[j % COLOR_PALETTE.length];
+        COLOR_PALETTE[colorIndex % COLOR_PALETTE.length];
+
+      colorIndex++;
     }
   }
 
