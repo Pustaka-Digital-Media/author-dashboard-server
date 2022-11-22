@@ -150,7 +150,7 @@ export const getChannelBooks = async (req: Request, res: Response) => {
         booksData[bookType.name]["audible"]["name"] = "Audible";
         booksData[bookType.name]["audible"]["count"] = audibleBooksCount;
         booksData[bookType.name]["audible"]["url"] =
-          S3_URL + "/amazon-icon.svg";
+          S3_URL + "/audible-icon.svg";
       } else {
         // Amazon
         const amazonBooksCount = await prisma.amazon_books.count({
