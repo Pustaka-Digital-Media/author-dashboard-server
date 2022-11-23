@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 import getAuthorName from "../utils/getAuthorName";
 
-import { COLOR_PALETTE } from "../utils/globals";
+import { COLOR_PALETTE, S3_URL } from "../utils/globals";
 
 const prisma = new PrismaClient();
 
@@ -138,4 +138,168 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
     name: authorName,
     data: graphData,
   });
+};
+
+export const prepareBooksPublishedPagination = async (
+  req: Request,
+  res: Response
+) => {
+  const result: any = {};
+
+  const authorId = parseInt(req.body.authorId);
+  const typeOfBook = parseInt(req.body.typeOfBook);
+  const limit = parseInt(req.body.limit);
+
+  let booksCount: number;
+  if (typeOfBook && typeOfBook > 0) {
+    booksCount = await prisma.book_tbl.count({
+      where: {
+        author_name: authorId,
+        type_of_book: typeOfBook,
+      },
+    });
+  } else {
+    booksCount = await prisma.book_tbl.count({
+      where: {
+        author_name: authorId,
+      },
+    });
+  }
+
+  result.totalPages = Math.floor(booksCount / limit) || 1;
+  result.totalBooks = booksCount;
+
+  res.json(result);
+};
+
+export const getPaginatedPublishedBooks = async (
+  req: Request,
+  res: Response
+) => {
+  const authorId = parseInt(req.body.authorId);
+  const typeOfBook = parseInt(req.body.typeOfBook);
+  const currentPage = parseInt(req.body.currentPage);
+  const limit = parseInt(req.body.limit);
+
+  const result: any = [];
+
+  const whereClause: any = {
+    author_name: authorId,
+  };
+  if (typeOfBook) {
+    if (typeOfBook === 4) {
+      whereClause.type_of_book = 1;
+      whereClause.paper_back_flag = 1;
+    } else {
+      whereClause.type_of_book = 3;
+    }
+  }
+
+  const books = await prisma.book_tbl.findMany({
+    skip: currentPage === 1 ? 0 : currentPage * limit,
+    take: limit,
+    where: whereClause,
+    select: {
+      book_id: true,
+      book_title: true,
+      url_name: true,
+      royalty: true,
+      number_of_page: true,
+      activated_at: true,
+      type_of_book: true,
+      genre: {
+        select: {
+          genre_name: true,
+        },
+      },
+      language_tbl_relation: {
+        select: {
+          language_name: true,
+        },
+      },
+    },
+    orderBy: {
+      activated_at: "desc",
+    },
+  });
+
+  const linkData: any = {};
+  for (let i = 0; i < books.length; i++) {
+    const book: any = books[i];
+
+    linkData["pustaka"] = {};
+    linkData["pustaka"]["url"] =
+      "https://www.pustaka.co.in/home/" +
+      (book.type_of_book === 3 ? "audiobooks" : "ebook") +
+      "/" +
+      book.language_tbl_relation.language_name.toLowerCase() +
+      "/" +
+      book.url_name;
+    linkData["pustaka"]["image_url"] = S3_URL + "/pustaka-table-icon.svg";
+
+    if (typeOfBook !== 4) {
+      if (typeOfBook !== 3) {
+        const amazonLinkData = await prisma.amazon_books.findUnique({
+          where: {
+            book_id: book.book_id,
+          },
+          select: {
+            asin: true,
+          },
+        });
+        linkData["amazon"] = {};
+        linkData["amazon"]["url"] =
+          "https://amazon.in/dp/" + amazonLinkData?.asin;
+        linkData["amazon"]["image_url"] = S3_URL + "/kindle-table-icon.svg";
+      }
+
+      if (typeOfBook !== 3) {
+        const scribdLinkData = await prisma.scribd_books.findUnique({
+          where: {
+            book_id: book.book_id,
+          },
+          select: {
+            doc_id: true,
+          },
+        });
+        linkData["scribd"] = {};
+        linkData["scribd"]["url"] =
+          "https://scribd.com/book/" + scribdLinkData?.doc_id;
+        linkData["scribd"]["image_url"] = S3_URL + "/scrib-table-icon.svg";
+      }
+
+      const googleLinkData = await prisma.google_books.findUnique({
+        where: {
+          book_id: book.book_id,
+        },
+        select: {
+          play_store_link: true,
+        },
+      });
+      linkData["google"] = {};
+      linkData["google"]["url"] = googleLinkData?.play_store_link;
+      linkData["google"]["image_url"] = S3_URL + "/google-table-icon.svg";
+
+      if (typeOfBook !== 3) {
+        const overdriveLinkData = await prisma.overdrive_books.findUnique({
+          where: {
+            book_id: book.book_id,
+          },
+          select: {
+            sample_link: true,
+          },
+        });
+        linkData["overdrive"] = {};
+        linkData["overdrive"]["url"] = overdriveLinkData?.sample_link;
+        linkData["overdrive"]["image_url"] =
+          S3_URL + "/overdrive-table-icon.svg";
+      }
+    }
+
+    book.channel_links = linkData;
+
+    result.push(book);
+  }
+
+  res.json(result);
 };
