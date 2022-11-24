@@ -34,6 +34,6 @@ app.use("/dashboard", dashboardRouter);
 app.use("/user", userRouter);
 app.use("/books", booksRouter);
 
-app.listen(8080, () => {
+app.listen(process.env.PORT || 8080, () => {
   console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);
 });
