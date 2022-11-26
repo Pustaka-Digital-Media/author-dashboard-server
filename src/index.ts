@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import dashboardRouter from "./routes/dashboard";
 import userRouter from "./routes/user";
 import booksRouter from "./routes/books";
+import profileRouter from "./routes/profile";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use(function (req, res, next) {
 app.use("/dashboard", dashboardRouter);
 app.use("/user", userRouter);
 app.use("/books", booksRouter);
+app.use("/profile", profileRouter);
 
 app.listen(process.env.PORT || 8080, () => {
   console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);

@@ -155,12 +155,13 @@ model author_gift_books {
 }
 
 model author_language {
-  id                   Int     @id @default(autoincrement())
+  id                   Int          @id @default(autoincrement())
   author_id            Int?
-  language_id          Int?
-  display_name1        String? @db.VarChar(45)
-  display_name2        String? @db.VarChar(45)
-  regional_author_name String? @db.VarChar(45)
+  language             language_tbl @relation(fields: [language_id], references: [language_id])
+  language_id          Int          @unique
+  display_name1        String?      @db.VarChar(45)
+  display_name2        String?      @db.VarChar(45)
+  regional_author_name String?      @db.VarChar(45)
 }
 
 model author_royalty_details {
@@ -601,7 +602,8 @@ model language_tbl {
   created_at             DateTime @db.DateTime(0)
   updated_at             DateTime @db.DateTime(0)
 
-  books book_tbl[]
+  books           book_tbl[]
+  authorLanguages author_language[]
 }
 
 model ledger_head_tbl {

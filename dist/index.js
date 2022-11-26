@@ -8,6 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const dashboard_1 = __importDefault(require("./routes/dashboard"));
 const user_1 = __importDefault(require("./routes/user"));
 const books_1 = __importDefault(require("./routes/books"));
+const profile_1 = __importDefault(require("./routes/profile"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT;
@@ -24,6 +25,7 @@ app.use(function (req, res, next) {
 app.use("/dashboard", dashboard_1.default);
 app.use("/user", user_1.default);
 app.use("/books", books_1.default);
+app.use("/profile", profile_1.default);
 app.listen(process.env.PORT || 8080, () => {
     console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);
 });
