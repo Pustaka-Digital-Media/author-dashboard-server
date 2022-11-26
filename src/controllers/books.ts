@@ -191,7 +191,7 @@ export const getPaginatedPublishedBooks = async (
       whereClause.type_of_book = 1;
       whereClause.paper_back_flag = 1;
     } else {
-      whereClause.type_of_book = 3;
+      whereClause.type_of_book = typeOfBook;
     }
   }
 
@@ -302,4 +302,33 @@ export const getPaginatedPublishedBooks = async (
   }
 
   res.json(result);
+};
+
+export const getBooksPublishedGraphData = async (
+  req: Request,
+  res: Response
+) => {
+  const authorId = parseInt(req.body.authorId);
+
+  (BigInt.prototype as any).toJSON = function () {
+    const int = Number.parseInt(this.toString());
+    return int ?? this.toString();
+  };
+
+  const graphData = await prisma.$queryRaw`
+    SELECT
+      COUNT(*) AS book_count,
+      DATE_FORMAT(book_tbl.activated_at, '%b, %y') AS published_date,
+      book_tbl.activated_at as raw_date
+    FROM
+      book_tbl
+    WHERE
+      book_tbl.author_name = ${authorId}
+      AND book_tbl.activated_at IS NOT NULL
+      AND book_tbl.status = 1
+    GROUP BY published_date
+    ORDER BY book_tbl.activated_at ASC
+  `;
+
+  res.json(graphData);
 };

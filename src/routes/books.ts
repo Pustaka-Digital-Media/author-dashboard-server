@@ -5,6 +5,7 @@ import {
   getLanguageGraphData,
   prepareBooksPublishedPagination,
   getPaginatedPublishedBooks,
+  getBooksPublishedGraphData,
 } from "../controllers/books";
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.post(
   prepareBooksPublishedPagination
 );
 router.post("/getPaginatedPublishedBooks", getPaginatedPublishedBooks);
+router.post("/getBooksPublishedGraphData", getBooksPublishedGraphData);
 
 export default router;

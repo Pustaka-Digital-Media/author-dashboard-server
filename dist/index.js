@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const serverless_http_1 = __importDefault(require("serverless-http"));
 const dashboard_1 = __importDefault(require("./routes/dashboard"));
 const user_1 = __importDefault(require("./routes/user"));
 const books_1 = __importDefault(require("./routes/books"));
@@ -25,12 +24,7 @@ app.use(function (req, res, next) {
 app.use("/dashboard", dashboard_1.default);
 app.use("/user", user_1.default);
 app.use("/books", books_1.default);
-if (process.env.NODE_ENV === "production") {
-    module.exports.handler = (0, serverless_http_1.default)(app);
-}
-else {
-    app.listen(8080, () => {
-        console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);
-    });
-}
+app.listen(process.env.PORT || 8080, () => {
+    console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);
+});
 //# sourceMappingURL=index.js.map

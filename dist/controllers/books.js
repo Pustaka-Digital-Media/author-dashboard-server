@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPaginatedPublishedBooks = exports.prepareBooksPublishedPagination = exports.getGenreGraphData = exports.getLanguageGraphData = void 0;
+exports.getBooksPublishedGraphData = exports.getPaginatedPublishedBooks = exports.prepareBooksPublishedPagination = exports.getGenreGraphData = exports.getLanguageGraphData = void 0;
 const client_1 = require("@prisma/client");
 const getAuthorName_1 = __importDefault(require("../utils/getAuthorName"));
 const globals_1 = require("../utils/globals");
@@ -172,7 +172,7 @@ const getPaginatedPublishedBooks = async (req, res) => {
             whereClause.paper_back_flag = 1;
         }
         else {
-            whereClause.type_of_book = 3;
+            whereClause.type_of_book = typeOfBook;
         }
     }
     const books = await prisma.book_tbl.findMany({
@@ -275,4 +275,27 @@ const getPaginatedPublishedBooks = async (req, res) => {
     res.json(result);
 };
 exports.getPaginatedPublishedBooks = getPaginatedPublishedBooks;
+const getBooksPublishedGraphData = async (req, res) => {
+    const authorId = parseInt(req.body.authorId);
+    BigInt.prototype.toJSON = function () {
+        const int = Number.parseInt(this.toString());
+        return int !== null && int !== void 0 ? int : this.toString();
+    };
+    const graphData = await prisma.$queryRaw `
+    SELECT
+      COUNT(*) AS book_count,
+      DATE_FORMAT(book_tbl.activated_at, '%b, %y') AS published_date,
+      book_tbl.activated_at as raw_date
+    FROM
+      book_tbl
+    WHERE
+      book_tbl.author_name = ${authorId}
+      AND book_tbl.activated_at IS NOT NULL
+      AND book_tbl.status = 1
+    GROUP BY published_date
+    ORDER BY book_tbl.activated_at ASC
+  `;
+    res.json(graphData);
+};
+exports.getBooksPublishedGraphData = getBooksPublishedGraphData;
 //# sourceMappingURL=books.js.map
