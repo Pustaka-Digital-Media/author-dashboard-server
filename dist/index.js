@@ -22,6 +22,9 @@ app.use(function (req, res, next) {
     }
     return next();
 });
+app.get("/", (req, res) => {
+    res.send("Pustaka Author Dashboard API");
+});
 app.use("/dashboard", dashboard_1.default);
 app.use("/user", user_1.default);
 app.use("/books", books_1.default);
