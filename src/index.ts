@@ -31,6 +31,10 @@ app.use(function (req, res, next) {
   return next();
 });
 
+app.get("/", (req, res) => {
+  res.send("Pustaka Author Dashboard API")
+})
+
 app.use("/dashboard", dashboardRouter);
 app.use("/user", userRouter);
 app.use("/books", booksRouter);
