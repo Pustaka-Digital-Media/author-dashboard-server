@@ -39,3 +39,5 @@ app.use("/profile", profileRouter);
 app.listen(process.env.PORT || 8080, () => {
   console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);
 });
+
+module.exports = app

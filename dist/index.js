@@ -29,4 +29,5 @@ app.use("/profile", profile_1.default);
 app.listen(process.env.PORT || 8080, () => {
     console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);
 });
+module.exports = app;
 //# sourceMappingURL=index.js.map
