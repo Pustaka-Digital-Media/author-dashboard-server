@@ -11,5 +11,8 @@ router.post("/getLanguageGraphData", books_1.getLanguageGraphData);
 router.post("/prepareBooksPublishedPagination", books_1.prepareBooksPublishedPagination);
 router.post("/getPaginatedPublishedBooks", books_1.getPaginatedPublishedBooks);
 router.post("/getBooksPublishedGraphData", books_1.getBooksPublishedGraphData);
+router.post("/prepareGiftBooksPagination", books_1.prepareGiftBooksPagination);
+router.post("/getPaginatedGiftBooks", books_1.getPaginatedGiftBooks);
+router.post("/getGiftBookDetails", books_1.getGiftBookDetails);
 exports.default = router;
 //# sourceMappingURL=books.js.map

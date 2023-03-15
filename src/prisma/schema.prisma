@@ -150,8 +150,12 @@ model author_gift_books {
   id        Int       @id @default(autoincrement())
   author_id Int?
   book_id   Int?
-  user_id   Int?
+  user_id   Int       @unique
   date      DateTime? @default(now()) @db.Timestamp(0)
+
+  book   book_tbl  @relation(fields: [bookId], references: [book_id])
+  bookId Int
+  user   users_tbl @relation(fields: [user_id], references: [user_id])
 }
 
 model author_language {
@@ -299,6 +303,8 @@ model book_tbl {
   storytelBookId  storytel_books?
   overdriveBookId overdrive_books?
   audibleBookId   audible_books?
+
+  giftBooks author_gift_books[]
 }
 
 model book_types {
@@ -1165,6 +1171,8 @@ model users_tbl {
   secret_code     String?   @db.VarChar(45)
   channel         String?   @db.VarChar(10)
   profile_img_url String?   @db.VarChar(100)
+
+  giftBooks author_gift_books[]
 }
 
 model wallet_order_tbl {

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBooksPublishedGraphData = exports.getPaginatedPublishedBooks = exports.prepareBooksPublishedPagination = exports.getGenreGraphData = exports.getLanguageGraphData = void 0;
+exports.getGiftBookDetails = exports.getPaginatedGiftBooks = exports.prepareGiftBooksPagination = exports.getBooksPublishedGraphData = exports.getPaginatedPublishedBooks = exports.prepareBooksPublishedPagination = exports.getGenreGraphData = exports.getLanguageGraphData = void 0;
 const client_1 = require("@prisma/client");
 const getAuthorName_1 = __importDefault(require("../utils/getAuthorName"));
 const globals_1 = require("../utils/globals");
@@ -298,4 +298,105 @@ const getBooksPublishedGraphData = async (req, res) => {
     res.json(graphData);
 };
 exports.getBooksPublishedGraphData = getBooksPublishedGraphData;
+const prepareGiftBooksPagination = async (req, res) => {
+    const result = {};
+    const authorId = parseInt(req.body.authorId);
+    const limit = parseInt(req.body.limit);
+    let booksCount;
+    booksCount = await prisma.book_tbl.count({
+        where: {
+            author_name: authorId,
+        },
+    });
+    result.totalPages = Math.floor(booksCount / limit) || 1;
+    result.totalBooks = booksCount;
+    res.json(result);
+};
+exports.prepareGiftBooksPagination = prepareGiftBooksPagination;
+const getPaginatedGiftBooks = async (req, res) => {
+    const authorId = parseInt(req.body.authorId);
+    const currentPage = parseInt(req.body.currentPage);
+    const limit = parseInt(req.body.limit);
+    const result = [];
+    const books = await prisma.book_tbl.findMany({
+        skip: currentPage === 1 ? 0 : currentPage * limit,
+        take: limit,
+        where: {
+            author_name: authorId,
+        },
+        select: {
+            book_id: true,
+            book_title: true,
+            url_name: true,
+            number_of_page: true,
+            type_of_book: true,
+            paper_back_flag: true,
+            genre: {
+                select: {
+                    genre_name: true,
+                },
+            },
+            language_tbl_relation: {
+                select: {
+                    language_name: true,
+                },
+            },
+        },
+        orderBy: {
+            activated_at: "desc",
+        },
+    });
+    for (let i = 0; i < books.length; i++) {
+        let book = books[i];
+        const giftCount = await prisma.author_gift_books.count({
+            where: {
+                book_id: book.book_id,
+            },
+        });
+        book.gift_count = giftCount;
+        if (book.type_of_book === 3) {
+            book.type = "Audiobook";
+        }
+        else {
+            book.type = "eBook";
+        }
+        result.push(book);
+    }
+    res.json(result);
+};
+exports.getPaginatedGiftBooks = getPaginatedGiftBooks;
+const getGiftBookDetails = async (req, res) => {
+    const bookId = parseInt(req.body.bookId);
+    const bookDetails = await prisma.book_tbl.findFirst({
+        where: {
+            book_id: bookId,
+        },
+        select: {
+            book_title: true,
+            genre: {
+                select: {
+                    genre_name: true,
+                },
+            },
+        },
+    });
+    const giftBooks = await prisma.author_gift_books.findMany({
+        where: {
+            book_id: bookId,
+        },
+        select: {
+            book_id: true,
+            user: {
+                select: {
+                    user_id: true,
+                    username: true,
+                    email: true,
+                },
+            },
+        },
+    });
+    bookDetails.giftUsers = giftBooks;
+    res.json(bookDetails);
+};
+exports.getGiftBookDetails = getGiftBookDetails;
 //# sourceMappingURL=books.js.map

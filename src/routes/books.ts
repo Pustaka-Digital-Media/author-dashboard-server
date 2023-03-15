@@ -6,6 +6,9 @@ import {
   prepareBooksPublishedPagination,
   getPaginatedPublishedBooks,
   getBooksPublishedGraphData,
+  prepareGiftBooksPagination,
+  getPaginatedGiftBooks,
+  getGiftBookDetails,
 } from "../controllers/books";
 
 const router = express.Router();
@@ -18,5 +21,8 @@ router.post(
 );
 router.post("/getPaginatedPublishedBooks", getPaginatedPublishedBooks);
 router.post("/getBooksPublishedGraphData", getBooksPublishedGraphData);
+router.post("/prepareGiftBooksPagination", prepareGiftBooksPagination);
+router.post("/getPaginatedGiftBooks", getPaginatedGiftBooks);
+router.post("/getGiftBookDetails", getGiftBookDetails);
 
 export default router;
