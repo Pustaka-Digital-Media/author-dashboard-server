@@ -74,7 +74,8 @@ model amazon_transactions {
   payment_amount           Float     @db.Float
   payment_currency         String    @db.VarChar(5)
   program_type             String    @db.VarChar(10)
-  book_id                  Int
+  book                     book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id                  Int       @unique
   author_id                Int
   user_id                  Int?
   copyright_owner          Int?
@@ -125,7 +126,8 @@ model audible_transactions {
   total_qty           Int?
   total_net_sales     Float?    @db.Float
   total_royalty       Float?    @db.Float
-  book_id             Int?
+  book                book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id             Int       @unique
   author_id           Int?
   language_id         Int?
   copyright_owner     Int?
@@ -224,7 +226,8 @@ model author_transaction {
   id                                     Int       @id @default(autoincrement())
   order_id                               BigInt
   order_date                             DateTime? @db.Date
-  book_id                                Int
+  book                                   book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id                                Int       @unique
   author_id                              Int
   order_type                             String    @db.Char(1)
   copy_right_seller                      Int
@@ -304,7 +307,15 @@ model book_tbl {
   overdriveBookId overdrive_books?
   audibleBookId   audible_books?
 
-  giftBooks author_gift_books[]
+  giftBooks              author_gift_books[]
+  amazon_transactions    amazon_transactions?
+  audible_transactions   audible_transactions?
+  author_transaction     author_transaction?
+  google_transactions    google_transactions?
+  kobo_transaction       kobo_transaction?
+  overdrive_transactions overdrive_transactions?
+  scribd_transaction     scribd_transaction?
+  storytel_transactions  storytel_transactions?
 }
 
 model book_types {
@@ -549,7 +560,8 @@ model google_transactions {
   earnings_amount              Float    @db.Float
   currency_conversion_rate     Float    @db.Float
   line_of_business             String   @db.VarChar(15)
-  book_id                      Int
+  book                         book_tbl @relation(fields: [book_id], references: [book_id])
+  book_id                      Int      @unique
   author_id                    Int
   language_id                  Int
   currency_exchange            Float    @db.Float
@@ -589,7 +601,8 @@ model kobo_transaction {
   net_due                    Float    @db.Float
   payable_currency           String   @db.VarChar(5)
   total_tax                  Float?   @db.Float
-  book_id                    Int
+  book                       book_tbl @relation(fields: [book_id], references: [book_id])
+  book_id                    Int      @unique
   author_id                  Int
   paid_inr                   Float    @db.Float
   user_id                    Int
@@ -752,7 +765,8 @@ model overdrive_transactions {
   srp_usd             Float    @db.Float
   discount            Int
   amt_owed_usd        Int
-  book_id             Int
+  book                book_tbl @relation(fields: [book_id], references: [book_id])
+  book_id             Int      @unique
   author_id           Int
   language_id         Int
   exchange_rate       Int
@@ -973,7 +987,8 @@ model scribd_transaction {
   Unique_interaction_ID            String   @db.VarChar(100)
   ISO_Country_Code                 String   @db.VarChar(20)
   Threshold_Date                   DateTime @db.Date
-  book_id                          Int
+  book                             book_tbl @relation(fields: [book_id], references: [book_id])
+  book_id                          Int      @unique
   author_id                        Int
   language_id                      Int?
   converted_inr                    Float    @db.Float
@@ -1021,7 +1036,8 @@ model storytel_transactions {
   imprint                     String?   @db.VarChar(45)
   consumption_dates           String?   @db.VarChar(45)
   book_type                   String?   @db.VarChar(25)
-  book_id                     Int?
+  book                        book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id                     Int       @unique
   author_id                   Int?
   language_id                 Int?
   user_id                     BigInt?

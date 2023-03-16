@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChannelBooks = exports.getBasicDetails = void 0;
+exports.getTransactionStatusSummary = exports.getChannelBooks = exports.getBasicDetails = void 0;
 const client_1 = require("@prisma/client");
 const getAuthorName_1 = __importDefault(require("../utils/getAuthorName"));
 const globals_1 = require("../utils/globals");
@@ -79,6 +79,17 @@ const getChannelBooks = async (req, res) => {
     booksData["ebooks"] = {};
     booksData["audiobooks"] = {};
     booksData["paperback"] = {};
+    booksData["transactionStats"] = {};
+    booksData["transactionStats"]["paid"] = {
+        ebooks: 0,
+        audiobooks: 0,
+        paperback: 0,
+    };
+    booksData["transactionStats"]["pending"] = {
+        ebooks: 0,
+        audiobooks: 0,
+        paperback: 0,
+    };
     const authorName = await (0, getAuthorName_1.default)(authorId);
     if (includeTypes.includes(1)) {
         const pustakaEBooksCount = await prisma.book_tbl.count({
@@ -91,6 +102,68 @@ const getChannelBooks = async (req, res) => {
         booksData["ebooks"]["pustaka"]["name"] = "Pustaka";
         booksData["ebooks"]["pustaka"]["count"] = pustakaEBooksCount;
         booksData["ebooks"]["pustaka"]["url"] = globals_1.S3_URL + "/pustaka-icon.svg";
+        for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+            const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+            const amountData = await prisma.author_transaction.aggregate({
+                _sum: {
+                    book_final_royalty_value_inr: true,
+                },
+                where: {
+                    pay_status: {
+                        equals: transactionDetails.status,
+                    },
+                    book: {
+                        type_of_book: {
+                            equals: 1,
+                        },
+                    },
+                    copyright_owner: authorId,
+                },
+            });
+            booksData["transactionStats"][transactionDetails.name]["ebooks"] +=
+                amountData._sum.book_final_royalty_value_inr;
+        }
+        const scribdBooksCount = await prisma.scribd_books.count({
+            where: {
+                author_id: authorId,
+                book: {
+                    type_of_book: 1,
+                },
+            },
+        });
+        booksData["ebooks"]["scribd"] = {};
+        booksData["ebooks"]["scribd"]["name"] = "Scribd";
+        booksData["ebooks"]["scribd"]["count"] = scribdBooksCount;
+        booksData["ebooks"]["scribd"]["url"] = globals_1.S3_URL + "/scrib-icon.svg";
+        for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+            const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+            const amountData = await prisma.scribd_transaction.aggregate({
+                _sum: {
+                    converted_inr: true,
+                },
+                where: {
+                    status: {
+                        equals: transactionDetails.status,
+                    },
+                    book: {
+                        type_of_book: {
+                            equals: 1,
+                        },
+                    },
+                    copyright_owner: authorId,
+                },
+            });
+            booksData["transactionStats"][transactionDetails.name]["ebooks"] +=
+                amountData._sum.converted_inr;
+        }
+        booksData["ebooks"]["pratilipi"] = {};
+        booksData["ebooks"]["pratilipi"]["name"] = "Pratilipi";
+        booksData["ebooks"]["pratilipi"]["count"] = 0;
+        booksData["ebooks"]["pratilipi"]["url"] = globals_1.S3_URL + "/pratilipi-icon.png";
+        booksData["ebooks"]["odilo"] = {};
+        booksData["ebooks"]["odilo"]["name"] = "Odilo";
+        booksData["ebooks"]["odilo"]["count"] = 0;
+        booksData["ebooks"]["odilo"]["url"] = globals_1.S3_URL + "/odilo-icon.svg";
     }
     if (includeTypes.includes(3)) {
         const pustakaAudiobooksCount = await prisma.book_tbl.count({
@@ -103,6 +176,11 @@ const getChannelBooks = async (req, res) => {
         booksData["audiobooks"]["pustaka"]["name"] = "Pustaka";
         booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
         booksData["audiobooks"]["pustaka"]["url"] = globals_1.S3_URL + "/pustaka-icon.svg";
+        booksData["audiobooks"]["pratilipiFM"] = {};
+        booksData["audiobooks"]["pratilipiFM"]["name"] = "Pratilipi FM";
+        booksData["audiobooks"]["pratilipiFM"]["count"] = 0;
+        booksData["audiobooks"]["pratilipiFM"]["url"] =
+            globals_1.S3_URL + "/pratilipi-icon.png";
     }
     if (includeTypes.includes(4)) {
         const paperbackCount = await prisma.book_tbl.count({
@@ -115,6 +193,34 @@ const getChannelBooks = async (req, res) => {
         booksData["paperback"]["pustaka"]["name"] = "Pustaka";
         booksData["paperback"]["pustaka"]["count"] = paperbackCount;
         booksData["paperback"]["pustaka"]["url"] = globals_1.S3_URL + "/pustaka-icon.svg";
+        for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+            const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+            const amountData = await prisma.author_transaction.aggregate({
+                _sum: {
+                    book_final_royalty_value_inr: true,
+                },
+                where: {
+                    pay_status: {
+                        equals: transactionDetails.status,
+                    },
+                    order_type: {
+                        in: ["6", "9"],
+                    },
+                    copyright_owner: authorId,
+                },
+            });
+            booksData["transactionStats"][transactionDetails.name]["paperback"] +=
+                amountData._sum.book_final_royalty_value_inr;
+        }
+        booksData["paperback"]["amazon"] = {};
+        booksData["paperback"]["amazon"]["name"] = "Amazon";
+        booksData["paperback"]["amazon"]["count"] = 0;
+        booksData["paperback"]["amazon"]["url"] =
+            globals_1.S3_URL + "/amazon-paperback-icon.svg";
+        booksData["paperback"]["flipkart"] = {};
+        booksData["paperback"]["flipkart"]["name"] = "Flipkart";
+        booksData["paperback"]["flipkart"]["count"] = 0;
+        booksData["paperback"]["flipkart"]["url"] = globals_1.S3_URL + "/flipkart-icon.svg";
     }
     for (let i = 0; i < globals_1.BOOK_TYPES.length; i++) {
         const bookType = globals_1.BOOK_TYPES[i];
@@ -133,6 +239,26 @@ const getChannelBooks = async (req, res) => {
                 booksData[bookType.name]["audible"]["count"] = audibleBooksCount;
                 booksData[bookType.name]["audible"]["url"] =
                     globals_1.S3_URL + "/audible-icon.svg";
+                for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+                    const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+                    const amountData = await prisma.audible_transactions.aggregate({
+                        _sum: {
+                            final_royalty_value: true,
+                        },
+                        where: {
+                            status: {
+                                equals: transactionDetails.status,
+                            },
+                            book: {
+                                type_of_book: {
+                                    equals: 3,
+                                },
+                            },
+                            copyright_owner: authorId,
+                        },
+                    });
+                    booksData["transactionStats"][transactionDetails.name]["audiobooks"] += amountData._sum.final_royalty_value;
+                }
             }
             else {
                 const amazonBooksCount = await prisma.amazon_books.count({
@@ -147,19 +273,28 @@ const getChannelBooks = async (req, res) => {
                 booksData[bookType.name]["amazon"]["name"] = "Amazon";
                 booksData[bookType.name]["amazon"]["count"] = amazonBooksCount;
                 booksData[bookType.name]["amazon"]["url"] = globals_1.S3_URL + "/amazon-icon.svg";
+                for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+                    const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+                    const amountData = await prisma.amazon_transactions.aggregate({
+                        _sum: {
+                            final_royalty_value: true,
+                        },
+                        where: {
+                            status: {
+                                equals: transactionDetails.status === "O" ? "R" : "P",
+                            },
+                            book: {
+                                type_of_book: {
+                                    equals: 1,
+                                },
+                            },
+                            copyright_owner: authorId,
+                        },
+                    });
+                    booksData["transactionStats"][transactionDetails.name]["ebooks"] +=
+                        amountData._sum.final_royalty_value;
+                }
             }
-            const scribdBooksCount = await prisma.scribd_books.count({
-                where: {
-                    author_id: authorId,
-                    book: {
-                        type_of_book: bookType.id,
-                    },
-                },
-            });
-            booksData[bookType.name]["scribd"] = {};
-            booksData[bookType.name]["scribd"]["name"] = "Scribd";
-            booksData[bookType.name]["scribd"]["count"] = scribdBooksCount;
-            booksData[bookType.name]["scribd"]["url"] = globals_1.S3_URL + "/scrib-icon.svg";
             const googleBooksCount = await prisma.google_books.count({
                 where: {
                     author_id: authorId,
@@ -169,10 +304,31 @@ const getChannelBooks = async (req, res) => {
                 },
             });
             booksData[bookType.name]["google"] = {};
-            booksData[bookType.name]["google"]["name"] = "Google";
+            booksData[bookType.name]["google"]["name"] = "Google Books";
             booksData[bookType.name]["google"]["count"] = googleBooksCount;
             booksData[bookType.name]["google"]["url"] =
                 globals_1.S3_URL + "/google-books-icon.svg";
+            for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+                const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+                const amountData = await prisma.google_transactions.aggregate({
+                    _sum: {
+                        final_royalty_value: true,
+                    },
+                    where: {
+                        status: {
+                            equals: transactionDetails.status,
+                        },
+                        book: {
+                            type_of_book: {
+                                equals: bookType.id,
+                            },
+                        },
+                        copyright_owner: authorId,
+                    },
+                });
+                booksData["transactionStats"][transactionDetails.name][bookType.name] +=
+                    amountData._sum.final_royalty_value;
+            }
             const storytelBooksCount = await prisma.storytel_books.count({
                 where: {
                     author_id: authorId,
@@ -182,10 +338,31 @@ const getChannelBooks = async (req, res) => {
                 },
             });
             booksData[bookType.name]["storytel"] = {};
-            booksData[bookType.name]["storytel"]["name"] = "Storytel";
+            booksData[bookType.name]["storytel"]["name"] = "StoryTel";
             booksData[bookType.name]["storytel"]["count"] = storytelBooksCount;
             booksData[bookType.name]["storytel"]["url"] =
                 globals_1.S3_URL + "/storytel-icon.svg";
+            for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+                const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+                const amountData = await prisma.storytel_transactions.aggregate({
+                    _sum: {
+                        final_royalty_value: true,
+                    },
+                    where: {
+                        status: {
+                            equals: transactionDetails.status,
+                        },
+                        book: {
+                            type_of_book: {
+                                equals: bookType.id,
+                            },
+                        },
+                        copyright_owner: authorId,
+                    },
+                });
+                booksData["transactionStats"][transactionDetails.name][bookType.name] +=
+                    amountData._sum.final_royalty_value;
+            }
             const overdriveBooksCount = await prisma.overdrive_books.count({
                 where: {
                     author_id: authorId,
@@ -199,6 +376,27 @@ const getChannelBooks = async (req, res) => {
             booksData[bookType.name]["overdrive"]["count"] = overdriveBooksCount;
             booksData[bookType.name]["overdrive"]["url"] =
                 globals_1.S3_URL + "/overdrive-icon.svg";
+            for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+                const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+                const amountData = await prisma.overdrive_transactions.aggregate({
+                    _sum: {
+                        final_royalty_value: true,
+                    },
+                    where: {
+                        status: {
+                            equals: transactionDetails.status,
+                        },
+                        book: {
+                            type_of_book: {
+                                equals: bookType.id,
+                            },
+                        },
+                        copyright_owner: authorId,
+                    },
+                });
+                booksData["transactionStats"][transactionDetails.name][bookType.name] +=
+                    amountData._sum.final_royalty_value;
+            }
         }
     }
     res.json({
@@ -207,4 +405,197 @@ const getChannelBooks = async (req, res) => {
     });
 };
 exports.getChannelBooks = getChannelBooks;
+const getTransactionStatusSummary = async (req, res) => {
+    const authorId = parseInt(req.body.authorId);
+    let transactionData = {};
+    transactionData["paid"] = {
+        ebooks: 0,
+        audiobooks: 0,
+        paperback: 0,
+    };
+    transactionData["pending"] = {
+        ebooks: 0,
+        audiobooks: 0,
+        paperback: 0,
+    };
+    const authorName = await (0, getAuthorName_1.default)(authorId);
+    for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+        const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+        const amountData = await prisma.author_transaction.aggregate({
+            _sum: {
+                book_final_royalty_value_inr: true,
+            },
+            where: {
+                pay_status: {
+                    equals: transactionDetails.status,
+                },
+                book: {
+                    type_of_book: {
+                        equals: 1,
+                    },
+                },
+                copyright_owner: authorId,
+            },
+        });
+        transactionData[transactionDetails.name]["ebooks"] +=
+            amountData._sum.book_final_royalty_value_inr;
+    }
+    for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+        const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+        const amountData = await prisma.scribd_transaction.aggregate({
+            _sum: {
+                converted_inr: true,
+            },
+            where: {
+                status: {
+                    equals: transactionDetails.status,
+                },
+                book: {
+                    type_of_book: {
+                        equals: 1,
+                    },
+                },
+                copyright_owner: authorId,
+            },
+        });
+        transactionData[transactionDetails.name]["ebooks"] +=
+            amountData._sum.converted_inr;
+    }
+    for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+        const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+        const amountData = await prisma.author_transaction.aggregate({
+            _sum: {
+                book_final_royalty_value_inr: true,
+            },
+            where: {
+                pay_status: {
+                    equals: transactionDetails.status,
+                },
+                order_type: {
+                    in: ["6", "9"],
+                },
+                copyright_owner: authorId,
+            },
+        });
+        transactionData[transactionDetails.name]["paperback"] +=
+            amountData._sum.book_final_royalty_value_inr;
+    }
+    for (let i = 0; i < globals_1.BOOK_TYPES.length; i++) {
+        const bookType = globals_1.BOOK_TYPES[i];
+        if (bookType.id === 3) {
+            for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+                const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+                const amountData = await prisma.audible_transactions.aggregate({
+                    _sum: {
+                        final_royalty_value: true,
+                    },
+                    where: {
+                        status: {
+                            equals: transactionDetails.status,
+                        },
+                        book: {
+                            type_of_book: {
+                                equals: 3,
+                            },
+                        },
+                        copyright_owner: authorId,
+                    },
+                });
+                transactionData[transactionDetails.name]["audiobooks"] +=
+                    amountData._sum.final_royalty_value;
+            }
+        }
+        else {
+            for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+                const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+                const amountData = await prisma.amazon_transactions.aggregate({
+                    _sum: {
+                        final_royalty_value: true,
+                    },
+                    where: {
+                        status: {
+                            equals: transactionDetails.status === "O" ? "R" : "P",
+                        },
+                        book: {
+                            type_of_book: {
+                                equals: 1,
+                            },
+                        },
+                        copyright_owner: authorId,
+                    },
+                });
+                transactionData[transactionDetails.name]["ebooks"] +=
+                    amountData._sum.final_royalty_value;
+            }
+        }
+        for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+            const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+            const amountData = await prisma.google_transactions.aggregate({
+                _sum: {
+                    final_royalty_value: true,
+                },
+                where: {
+                    status: {
+                        equals: transactionDetails.status,
+                    },
+                    book: {
+                        type_of_book: {
+                            equals: bookType.id,
+                        },
+                    },
+                    copyright_owner: authorId,
+                },
+            });
+            transactionData[transactionDetails.name][bookType.name] +=
+                amountData._sum.final_royalty_value;
+        }
+        for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+            const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+            const amountData = await prisma.storytel_transactions.aggregate({
+                _sum: {
+                    final_royalty_value: true,
+                },
+                where: {
+                    status: {
+                        equals: transactionDetails.status,
+                    },
+                    book: {
+                        type_of_book: {
+                            equals: bookType.id,
+                        },
+                    },
+                    copyright_owner: authorId,
+                },
+            });
+            transactionData[transactionDetails.name][bookType.name] +=
+                amountData._sum.final_royalty_value;
+        }
+        for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+            const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+            const amountData = await prisma.overdrive_transactions.aggregate({
+                _sum: {
+                    final_royalty_value: true,
+                },
+                where: {
+                    status: {
+                        equals: transactionDetails.status,
+                    },
+                    book: {
+                        type_of_book: {
+                            equals: bookType.id,
+                        },
+                    },
+                    copyright_owner: authorId,
+                },
+            });
+            transactionData[transactionDetails.name][bookType.name] +=
+                amountData._sum.final_royalty_value;
+        }
+    }
+    res.json({
+        name: authorName,
+        data: transactionData,
+    });
+};
+exports.getTransactionStatusSummary = getTransactionStatusSummary;
 //# sourceMappingURL=dashboard.js.map

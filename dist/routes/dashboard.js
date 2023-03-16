@@ -8,5 +8,6 @@ const dashboard_1 = require("../controllers/dashboard");
 const router = express_1.default.Router();
 router.post("/getBasicDetails", dashboard_1.getBasicDetails);
 router.post("/getChannelBooks", dashboard_1.getChannelBooks);
+router.post("/getTransactionStatusSummary", dashboard_1.getTransactionStatusSummary);
 exports.default = router;
 //# sourceMappingURL=dashboard.js.map
