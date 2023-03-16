@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import fs from "fs";
+import path from "path";
 import https from "https";
 import http from "http";
 
@@ -49,8 +50,10 @@ app.use("/profile", profileRouter);
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(
   {
-    key: fs.readFileSync("../certs/privatekey.key"),
-    cert: fs.readFileSync("../certs/ssl_certificate.crt"),
+    key: fs.readFileSync(path.resolve(__dirname, "../certs/privatekey.key")),
+    cert: fs.readFileSync(
+      path.resolve(__dirname, "../certs/ssl_certificate.crt")
+    ),
   },
   app
 );
