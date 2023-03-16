@@ -2,6 +2,10 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
+import fs from "fs";
+import https from "https";
+import http from "http";
+
 import dashboardRouter from "./routes/dashboard";
 import userRouter from "./routes/user";
 import booksRouter from "./routes/books";
@@ -32,7 +36,7 @@ app.use(function (req, res, next) {
   return next();
 });
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.send("Pustaka Author Dashboard API");
 });
 
@@ -41,8 +45,20 @@ app.use("/user", userRouter);
 app.use("/books", booksRouter);
 app.use("/profile", profileRouter);
 
-app.listen(process.env.PORT || 8080, () => {
-  console.log(`⚡️ [server]: Server is running at http://localhost:${port}`);
+// Listen both http & https ports
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(
+  {
+    key: fs.readFileSync("../certs/privatekey.key"),
+    cert: fs.readFileSync("../certs/ssl_certificate.crt"),
+  },
+  app
+);
+
+httpServer.listen(port || 8080, () => {
+  console.log("HTTP Server running on port 80");
 });
 
-module.exports = app;
+httpsServer.listen(443, () => {
+  console.log("HTTPS Server running on port 443");
+});
