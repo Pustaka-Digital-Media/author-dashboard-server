@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "../generated/client";
+import { PrismaClient } from "@prisma/client";
 
 import { getAuthorName } from "../utils/getAuthorInfo";
 

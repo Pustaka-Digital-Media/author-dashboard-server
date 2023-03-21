@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAuthorChannelLinks = exports.getAuthorName = void 0;
-const client_1 = require("../generated/client");
+const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getAuthorName = async (authorId) => {
     const authorNameData = await prisma.author_tbl.findFirst({

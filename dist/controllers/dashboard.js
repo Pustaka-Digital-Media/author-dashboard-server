@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTransactionStatusSummary = exports.getChannelBooks = exports.getBasicDetails = void 0;
-const client_1 = require("../generated/client");
+const client_1 = require("@prisma/client");
 const getAuthorInfo_1 = require("../utils/getAuthorInfo");
 const globals_1 = require("../utils/globals");
 const prisma = new client_1.PrismaClient();

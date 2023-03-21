@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRoyaltySummaryData = void 0;
-const client_1 = require("../generated/client");
+const client_1 = require("@prisma/client");
 const globals_1 = require("../utils/globals");
 const prisma = new client_1.PrismaClient({});
 const getRoyaltySummaryData = async (req, res) => {

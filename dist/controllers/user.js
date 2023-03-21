@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = void 0;
-const client_1 = require("../generated/client");
+const client_1 = require("@prisma/client");
 const md5_1 = __importDefault(require("md5"));
 const getAuthorIds_1 = __importDefault(require("../utils/getAuthorIds"));
 const getAuthorInfo_1 = require("../utils/getAuthorInfo");

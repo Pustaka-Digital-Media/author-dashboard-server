@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getGiftBookDetails = exports.getPaginatedGiftBooks = exports.prepareGiftBooksPagination = exports.getBooksPublishedGraphData = exports.getPaginatedPublishedBooks = exports.prepareBooksPublishedPagination = exports.getGenreGraphData = exports.getLanguageGraphData = void 0;
-const client_1 = require("../generated/client");
+const client_1 = require("@prisma/client");
 const getAuthorInfo_1 = require("../utils/getAuthorInfo");
 const globals_1 = require("../utils/globals");
 const prisma = new client_1.PrismaClient();
