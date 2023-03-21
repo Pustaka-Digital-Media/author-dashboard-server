@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/client";
 import md5 from "md5";
 
 import getAuthorIds from "../utils/getAuthorIds";
-import getAuthorName from "../utils/getAuthorName";
+import { getAuthorName } from "../utils/getAuthorInfo";
 
 const prisma = new PrismaClient();
 

@@ -1,18 +1,15 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getGiftBookDetails = exports.getPaginatedGiftBooks = exports.prepareGiftBooksPagination = exports.getBooksPublishedGraphData = exports.getPaginatedPublishedBooks = exports.prepareBooksPublishedPagination = exports.getGenreGraphData = exports.getLanguageGraphData = void 0;
-const client_1 = require("@prisma/client");
-const getAuthorName_1 = __importDefault(require("../utils/getAuthorName"));
+const client_1 = require("../generated/client");
+const getAuthorInfo_1 = require("../utils/getAuthorInfo");
 const globals_1 = require("../utils/globals");
 const prisma = new client_1.PrismaClient();
 const getLanguageGraphData = async (req, res) => {
     const graphData = {};
     const authorId = parseInt(req.body.authorId);
     const typeOfBook = parseInt(req.body.typeOfBook);
-    const authorName = await (0, getAuthorName_1.default)(authorId);
+    const authorName = await (0, getAuthorInfo_1.getAuthorName)(authorId);
     const languages = await prisma.language_tbl.findMany({
         where: {
             language_id: {
@@ -76,7 +73,7 @@ const getGenreGraphData = async (req, res) => {
     const graphData = {};
     const authorId = parseInt(req.body.authorId);
     const typeOfBook = parseInt(req.body.typeOfBook);
-    const authorName = await (0, getAuthorName_1.default)(authorId);
+    const authorName = await (0, getAuthorInfo_1.getAuthorName)(authorId);
     const genres = await prisma.genre_details_tbl.findMany({
         select: {
             genre_id: true,

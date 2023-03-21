@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/client";
 
-import getAuthorName from "../utils/getAuthorName";
+import { getAuthorName } from "../utils/getAuthorInfo";
 
 import { COLOR_PALETTE, S3_URL } from "../utils/globals";
 

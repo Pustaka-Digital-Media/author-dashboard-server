@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = void 0;
-const client_1 = require("@prisma/client");
+const client_1 = require("../generated/client");
 const md5_1 = __importDefault(require("md5"));
 const getAuthorIds_1 = __importDefault(require("../utils/getAuthorIds"));
-const getAuthorName_1 = __importDefault(require("../utils/getAuthorName"));
+const getAuthorInfo_1 = require("../utils/getAuthorInfo");
 const prisma = new client_1.PrismaClient();
 const login = async (req, res) => {
     const userData = req.body;
@@ -25,7 +25,7 @@ const login = async (req, res) => {
     const authorIds = await (0, getAuthorIds_1.default)(authorUser.user_id.toString());
     for (let i = 0; i < authorIds.length; i++) {
         const authorId = authorIds[i];
-        const authorName = await (0, getAuthorName_1.default)(authorId);
+        const authorName = await (0, getAuthorInfo_1.getAuthorName)(authorId);
         authorIdData.push({
             author_id: authorId,
             author_name: authorName,

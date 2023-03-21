@@ -1,5 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  output        = "../generated/client"
 }
 
 datasource db {
@@ -211,6 +213,9 @@ model author_tbl {
   user_id                   Int
   narrator_id               Int?
   amazon_link               String?   @db.VarChar(200)
+  pratilipi_link            String?   @db.VarChar(200)
+  audible_link              String?   @db.VarChar(200)
+  odilo_link                String?   @db.VarChar(200)
   scribd_link               String?   @db.VarChar(200)
   googlebooks_link          String?   @db.VarChar(200)
   storytel_link             String?   @db.VarChar(200)

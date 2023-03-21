@@ -8,6 +8,7 @@ export const TRANSACTION_STATUS = [
 ];
 export const S3_URL =
   "https://pustaka-assets.s3.ap-south-1.amazonaws.com/author-dashboard";
+export const PUSTAKA_URL = "https://pustaka.co.in";
 
 export const COLOR_PALETTE = [
   "#00296b",
