@@ -1,5 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -1000,6 +1000,13 @@ model scribd_transaction {
   status                           String   @db.Char(10)
   exchange_rate                    Float    @db.Float
   converted_inr_full               Float?   @db.Float
+}
+
+model site_config {
+  id       Int    @id @default(autoincrement())
+  key      String @db.VarChar(45)
+  value    String @db.VarChar(45)
+  category String @db.VarChar(45)
 }
 
 model storytel_books {

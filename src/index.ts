@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import ServerlessHttp from "serverless-http";
+// import Functions from "firebase-functions";
 
 import dashboardRouter from "./routes/dashboard";
 import userRouter from "./routes/user";
@@ -49,4 +49,4 @@ app.use("/settlement", settlementRouter);
 app.listen(port || 8080, () => {
   console.log("⚡ server running on port 8080");
 });
-module.exports.handler = ServerlessHttp(app);
+// exports.api = Functions.https.onRequest(app);

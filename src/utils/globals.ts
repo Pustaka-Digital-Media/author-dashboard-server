@@ -2,6 +2,11 @@ export const BOOK_TYPES = [
   { id: 1, name: "ebooks" },
   { id: 3, name: "audiobooks" },
 ];
+export const BOOK_TYPES_ALL = [
+  { id: 1, name: "ebooks" },
+  { id: 3, name: "audiobooks" },
+  { id: 10, name: "paperback" },
+];
 export const TRANSACTION_STATUS = [
   { name: "pending", status: "O" },
   { name: "paid", status: "P" },

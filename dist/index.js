@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
-const serverless_http_1 = __importDefault(require("serverless-http"));
 const dashboard_1 = __importDefault(require("./routes/dashboard"));
 const user_1 = __importDefault(require("./routes/user"));
 const books_1 = __importDefault(require("./routes/books"));
@@ -39,5 +38,4 @@ app.use("/settlement", settlement_1.default);
 app.listen(port || 8080, () => {
     console.log("⚡ server running on port 8080");
 });
-module.exports.handler = (0, serverless_http_1.default)(app);
 //# sourceMappingURL=index.js.map
