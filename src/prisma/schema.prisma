@@ -87,6 +87,17 @@ model amazon_transactions {
   status                   String    @db.VarChar(1)
 }
 
+model amazon_paperback_books {
+  id              Int      @id @default(autoincrement())
+  book_id         Int      @unique
+  asin            Int?
+  price           Int?
+  copyright_owner Int?
+  author_id       Int?
+  language        Int?
+  book            book_tbl @relation(fields: [book_id], references: [book_id])
+}
+
 model audible_books {
   id                Int       @id @default(autoincrement())
   product_id        String?   @db.VarChar(45)
@@ -319,6 +330,8 @@ model book_tbl {
   overdrive_transactions overdrive_transactions?
   scribd_transaction     scribd_transaction?
   storytel_transactions  storytel_transactions?
+  pratilipi_books        pratilipi_books?
+  amazon_paperback_books amazon_paperback_books?
 }
 
 model book_types {
@@ -867,6 +880,25 @@ model pod_progress {
   remarks           String?   @db.Text
   pause_startdate   DateTime? @db.DateTime(0)
   pause_enddate     DateTime? @db.DateTime(0)
+}
+
+model pratilipi_books {
+  id              Int      @id @default(autoincrement())
+  pustaka_id      Int?
+  author_email    String?
+  password        String?
+  author_name     String?
+  language        String?
+  content_titles  String?
+  series_id       String?
+  series_url      String?
+  number_of_parts Int?
+  uploaded_date   String?
+  book            book_tbl @relation(fields: [book_id], references: [book_id])
+  book_id         Int      @unique
+  author_id       Int?
+  language_id     Int?
+  copyright_owner Int?
 }
 
 model publisher_tbl {

@@ -268,6 +268,22 @@ export const getPaginatedPublishedBooks = async (
         linkData["scribd"]["image_url"] = S3_URL + "/scrib-table-icon.svg";
       }
 
+      if (typeOfBook !== 3) {
+        const pratilipiLinkData = await prisma.pratilipi_books.findUnique({
+          where: {
+            book_id: book.book_id,
+          },
+          select: {
+            series_url: true,
+          },
+        });
+        if (pratilipiLinkData != null) {
+          linkData["pratilipi"] = {};
+          linkData["pratilipi"]["url"] = pratilipiLinkData?.series_url;
+          linkData["pratilipi"]["image_url"] = S3_URL + "/pratilipi-icon.png";
+        }
+      }
+
       const googleLinkData = await prisma.google_books.findUnique({
         where: {
           book_id: book.book_id,
@@ -293,6 +309,23 @@ export const getPaginatedPublishedBooks = async (
         linkData["overdrive"]["url"] = overdriveLinkData?.sample_link;
         linkData["overdrive"]["image_url"] =
           S3_URL + "/overdrive-table-icon.svg";
+      }
+    } else {
+      const amazonPaperbackLinkData =
+        await prisma.amazon_paperback_books.findUnique({
+          where: {
+            book_id: book.book_id,
+          },
+          select: {
+            asin: true,
+          },
+        });
+      if (amazonPaperbackLinkData?.asin) {
+        linkData["amazonpaperback"] = {};
+        linkData["amazonpaperback"]["url"] =
+          "https://amazon.in/dp/" + amazonPaperbackLinkData?.asin;
+        linkData["amazonpaperback"]["image_url"] =
+          S3_URL + "/amazon-paperback-icon.svg";
       }
     }
 

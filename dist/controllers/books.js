@@ -240,6 +240,21 @@ const getPaginatedPublishedBooks = async (req, res) => {
                     "https://scribd.com/book/" + (scribdLinkData === null || scribdLinkData === void 0 ? void 0 : scribdLinkData.doc_id);
                 linkData["scribd"]["image_url"] = globals_1.S3_URL + "/scrib-table-icon.svg";
             }
+            if (typeOfBook !== 3) {
+                const pratilipiLinkData = await prisma.pratilipi_books.findUnique({
+                    where: {
+                        book_id: book.book_id,
+                    },
+                    select: {
+                        series_url: true,
+                    },
+                });
+                if (pratilipiLinkData != null) {
+                    linkData["pratilipi"] = {};
+                    linkData["pratilipi"]["url"] = pratilipiLinkData === null || pratilipiLinkData === void 0 ? void 0 : pratilipiLinkData.series_url;
+                    linkData["pratilipi"]["image_url"] = globals_1.S3_URL + "/pratilipi-icon.png";
+                }
+            }
             const googleLinkData = await prisma.google_books.findUnique({
                 where: {
                     book_id: book.book_id,
@@ -264,6 +279,23 @@ const getPaginatedPublishedBooks = async (req, res) => {
                 linkData["overdrive"]["url"] = overdriveLinkData === null || overdriveLinkData === void 0 ? void 0 : overdriveLinkData.sample_link;
                 linkData["overdrive"]["image_url"] =
                     globals_1.S3_URL + "/overdrive-table-icon.svg";
+            }
+        }
+        else {
+            const amazonPaperbackLinkData = await prisma.amazon_paperback_books.findUnique({
+                where: {
+                    book_id: book.book_id,
+                },
+                select: {
+                    asin: true,
+                },
+            });
+            if (amazonPaperbackLinkData === null || amazonPaperbackLinkData === void 0 ? void 0 : amazonPaperbackLinkData.asin) {
+                linkData["amazonpaperback"] = {};
+                linkData["amazonpaperback"]["url"] =
+                    "https://amazon.in/dp/" + (amazonPaperbackLinkData === null || amazonPaperbackLinkData === void 0 ? void 0 : amazonPaperbackLinkData.asin);
+                linkData["amazonpaperback"]["image_url"] =
+                    globals_1.S3_URL + "/amazon-paperback-icon.svg";
             }
         }
         book.channel_links = linkData;
