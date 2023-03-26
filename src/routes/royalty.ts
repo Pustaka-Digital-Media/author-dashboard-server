@@ -2,12 +2,14 @@ import express from "express";
 
 import {
   getRoyaltySummaryData,
-  getFyRoyaltySummary,
+  getAllChannelSummaryData,
+  getPaymentsForMonth,
 } from "../controllers/royalty";
 
 const router = express.Router();
 
 router.post("/getRoyaltySummaryData", getRoyaltySummaryData);
-router.post("/getFyRoyaltySummary", getFyRoyaltySummary);
+router.post("/getAllChannelSummaryData", getAllChannelSummaryData);
+router.post("/getPaymentsForMonth", getPaymentsForMonth);
 
 export default router;

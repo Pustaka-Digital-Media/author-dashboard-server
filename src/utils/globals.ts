@@ -2,15 +2,26 @@ export const BOOK_TYPES = [
   { id: 1, name: "ebooks" },
   { id: 3, name: "audiobooks" },
 ];
+
 export const BOOK_TYPES_ALL = [
   { id: 1, name: "ebooks" },
   { id: 3, name: "audiobooks" },
   { id: 10, name: "paperback" },
 ];
+
+export const PAPERBACK_BOOK_TYPES = [
+  { id: 7, name: "pustakaOnline" },
+  { id: 9, name: "pustakaBookFair" },
+  { id: 10, name: "amazon" },
+  // { id: 11, name: "flipkart" },
+  // { id: 12, name: "ingram" },
+];
+
 export const TRANSACTION_STATUS = [
   { name: "pending", status: "O" },
   { name: "paid", status: "P" },
 ];
+
 export const S3_URL =
   "https://pustaka-assets.s3.ap-south-1.amazonaws.com/author-dashboard";
 export const PUSTAKA_URL = "https://pustaka.co.in";

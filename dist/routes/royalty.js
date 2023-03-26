@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const royalty_1 = require("../controllers/royalty");
 const router = express_1.default.Router();
 router.post("/getRoyaltySummaryData", royalty_1.getRoyaltySummaryData);
-router.post("/getFyRoyaltySummary", royalty_1.getFyRoyaltySummary);
+router.post("/getAllChannelSummaryData", royalty_1.getAllChannelSummaryData);
+router.post("/getPaymentsForMonth", royalty_1.getPaymentsForMonth);
 exports.default = router;
 //# sourceMappingURL=royalty.js.map

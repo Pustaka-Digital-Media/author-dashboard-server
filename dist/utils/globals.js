@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.COLOR_PALETTE = exports.PUSTAKA_URL = exports.S3_URL = exports.TRANSACTION_STATUS = exports.BOOK_TYPES_ALL = exports.BOOK_TYPES = void 0;
+exports.COLOR_PALETTE = exports.PUSTAKA_URL = exports.S3_URL = exports.TRANSACTION_STATUS = exports.PAPERBACK_BOOK_TYPES = exports.BOOK_TYPES_ALL = exports.BOOK_TYPES = void 0;
 exports.BOOK_TYPES = [
     { id: 1, name: "ebooks" },
     { id: 3, name: "audiobooks" },
@@ -9,6 +9,11 @@ exports.BOOK_TYPES_ALL = [
     { id: 1, name: "ebooks" },
     { id: 3, name: "audiobooks" },
     { id: 10, name: "paperback" },
+];
+exports.PAPERBACK_BOOK_TYPES = [
+    { id: 7, name: "pustakaOnline" },
+    { id: 9, name: "pustakaBookFair" },
+    { id: 10, name: "amazon" },
 ];
 exports.TRANSACTION_STATUS = [
     { name: "pending", status: "O" },
