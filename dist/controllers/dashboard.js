@@ -255,6 +255,8 @@ const getChannelBooks = async (req, res) => {
 exports.getChannelBooks = getChannelBooks;
 const getTransactionStatusSummary = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
+    var d = new Date().setDate(0);
+    var prevMonthEnd = new Date(d);
     let transactionData = {};
     transactionData["paid"] = {
         ebooks: 0,
@@ -276,6 +278,9 @@ const getTransactionStatusSummary = async (req, res) => {
             where: {
                 pay_status: {
                     equals: transactionDetails.status,
+                },
+                order_date: {
+                    gt: prevMonthEnd,
                 },
                 book: {
                     type_of_book: {
