@@ -54,9 +54,15 @@ app.use("/settlement", settlementRouter);
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(
   {
-    key: fs.readFileSync(path.resolve(__dirname, "../certs/privatekey.key")),
+    key: fs.readFileSync(
+      path.resolve(__dirname, "../certs/api.pustaka.co.in.key")
+    ),
+    ca: fs.readFileSync(
+      path.resolve(__dirname, "../certs/api.pustaka.co.in.ca-bundle")
+    ),
+    passphrase: "Ebooks@123",
     cert: fs.readFileSync(
-      path.resolve(__dirname, "../certs/ssl_certificate.crt")
+      path.resolve(__dirname, "../certs/api.pustaka.co.in.crt")
     ),
   },
   app

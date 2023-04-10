@@ -41,7 +41,10 @@ app.use("/royalty", royalty_1.default);
 app.use("/settlement", settlement_1.default);
 const httpServer = http_1.default.createServer(app);
 const httpsServer = https_1.default.createServer({
-    cert: fs_1.default.readFileSync(path_1.default.resolve(__dirname, "../certs/ssl_certificate.crt")),
+    key: fs_1.default.readFileSync(path_1.default.resolve(__dirname, "../certs/api.pustaka.co.in.key")),
+    ca: fs_1.default.readFileSync(path_1.default.resolve(__dirname, "../certs/api.pustaka.co.in.ca-bundle")),
+    passphrase: "Ebooks@123",
+    cert: fs_1.default.readFileSync(path_1.default.resolve(__dirname, "../certs/api.pustaka.co.in.crt")),
 }, app);
 httpServer.listen(port || 8080, () => {
     console.log("HTTP Server running on port 80");
