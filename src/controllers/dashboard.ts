@@ -301,6 +301,9 @@ export const getTransactionStatusSummary = async (
 ) => {
   const authorId = parseInt(req.body.authorId);
 
+  var d = new Date().setDate(0);
+  var prevMonthEnd = new Date(d);
+
   let transactionData: any = {};
   transactionData["paid"] = {
     ebooks: 0,
@@ -327,6 +330,9 @@ export const getTransactionStatusSummary = async (
       where: {
         pay_status: {
           equals: transactionDetails.status,
+        },
+        order_date: {
+          gt: prevMonthEnd,
         },
         book: {
           type_of_book: {
