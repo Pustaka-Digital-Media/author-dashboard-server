@@ -54,7 +54,7 @@ app.use("/settlement", settlementRouter);
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(
   {
-    key: fs.readFileSync(path.resolve(__dirname, "../certs/privatekey.key")),
+    // key: fs.readFileSync(path.resolve(__dirname, "../certs/privatekey.key")),
     cert: fs.readFileSync(
       path.resolve(__dirname, "../certs/ssl_certificate.crt")
     ),

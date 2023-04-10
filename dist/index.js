@@ -41,7 +41,6 @@ app.use("/royalty", royalty_1.default);
 app.use("/settlement", settlement_1.default);
 const httpServer = http_1.default.createServer(app);
 const httpsServer = https_1.default.createServer({
-    key: fs_1.default.readFileSync(path_1.default.resolve(__dirname, "../certs/privatekey.key")),
     cert: fs_1.default.readFileSync(path_1.default.resolve(__dirname, "../certs/ssl_certificate.crt")),
 }, app);
 httpServer.listen(port || 8080, () => {
