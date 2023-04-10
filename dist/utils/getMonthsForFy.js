@@ -62,7 +62,7 @@ const getMonthsForFy = async (fyYearKey) => {
 const parseMonthString = async (monthStr) => {
     const dateObj = new Date(Date.parse(monthStr));
     const formattedDates = `${dateObj.getFullYear()}-${dateObj.getMonth()}-01,${dateObj.getFullYear()}-${dateObj.getMonth()}-31`;
-    return {};
+    return formattedDates;
 };
 exports.parseMonthString = parseMonthString;
 exports.default = getMonthsForFy;

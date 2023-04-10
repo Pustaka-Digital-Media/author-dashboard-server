@@ -78,7 +78,7 @@ export const parseMonthString = async (monthStr: string) => {
   const dateObj = new Date(Date.parse(monthStr));
   const formattedDates = `${dateObj.getFullYear()}-${dateObj.getMonth()}-01,${dateObj.getFullYear()}-${dateObj.getMonth()}-31`;
 
-  return {};
+  return formattedDates;
 };
 
 export default getMonthsForFy;

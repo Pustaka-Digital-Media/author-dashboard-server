@@ -1,7 +1,11 @@
 import express, { Express } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-// import Functions from "firebase-functions";
+
+import fs from "fs";
+import path from "path";
+import https from "https";
+import http from "http";
 
 import dashboardRouter from "./routes/dashboard";
 import userRouter from "./routes/user";
@@ -46,7 +50,25 @@ app.use("/profile", profileRouter);
 app.use("/royalty", royaltyRouter);
 app.use("/settlement", settlementRouter);
 
-app.listen(port || 8080, () => {
-  console.log("⚡ server running on port 8080");
+// Listen both http & https ports
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(
+  {
+    key: fs.readFileSync(path.resolve(__dirname, "../certs/privatekey.key")),
+    cert: fs.readFileSync(
+      path.resolve(__dirname, "../certs/ssl_certificate.crt")
+    ),
+  },
+  app
+);
+
+httpServer.listen(port || 8080, () => {
+  console.log("HTTP Server running on port 80");
 });
-// exports.api = Functions.https.onRequest(app);
+
+httpsServer.listen(443, () => {
+  console.log("HTTPS Server running on port 443");
+});
+// app.listen(8080, () => {
+//   console.log("⚡ server running on port 8080");
+// });

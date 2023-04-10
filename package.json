@@ -2,23 +2,6 @@
   "name": "pustaka-author-dashboard",
   "version": "1.0.0",
   "description": "API for authors managing and getting stats for their books and revenue from Pustaka Digital Media Pvt. Ltd.",
-  "main": "src/index.ts",
-  "engine": {
-    "node": "16.x"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
-    "postinstall": "prisma generate",
-    "serve": "npm run build && firebase emulators:start --only functions",
-    "shell": "npm run build && firebase functions:shell",
-    "deploy": "firebase deploy --only functions:api"
-  },
-  "prisma": {
-    "schema": "src/prisma/schema.prisma"
-  },
   "keywords": [
     "pustaka",
     "api",
@@ -28,15 +11,26 @@
   ],
   "author": "Rohan Rajesh",
   "license": "ISC",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
+  "engines": {
+    "node": "16"
+  },
+  "main": "lib/index.js",
   "dependencies": {
-    "@prisma/client": "^4.2.1",
+    "@prisma/client": "^4.12.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "firebase-admin": "^11.5.0",
-    "firebase-functions": "^4.2.0",
-    "md5": "^2.3.0",
-    "serverless-http": "^3.2.0"
+    "firebase-functions": "^4.2.1",
+    "md5": "^2.3.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
@@ -46,8 +40,7 @@
     "@types/node": "^18.7.8",
     "firebase-functions-test": "^3.0.0",
     "prisma": "^4.2.1",
-    "serverless-plugin-typescript": "^2.1.4",
-    "typescript": "^4.7.4"
+    "typescript": "^4.9.0"
   },
   "private": true
 }

@@ -555,12 +555,13 @@ const getAllChannelSummaryData = async (req, res) => {
 };
 exports.getAllChannelSummaryData = getAllChannelSummaryData;
 const getPaymentsForMonth = async (req, res) => {
+    var _a, _b;
     const authorId = parseInt(req.body.authorId);
     const copyrightOwner = parseInt(req.body.copyrightOwner);
     const typeId = parseInt(req.body.typeId);
     const monthKey = req.body.monthKey;
     const result = {};
-    const royaltySummary = {};
+    const channelData = {};
     let bookType = {};
     if (typeId === 1) {
         bookType = globals_1.BOOK_TYPES[0];
@@ -569,6 +570,413 @@ const getPaymentsForMonth = async (req, res) => {
         bookType = globals_1.BOOK_TYPES[1];
     }
     const dateParse = await (0, getMonthsForFy_1.parseMonthString)(monthKey);
+    const fyDates = dateParse.split(",");
+    const dateFormatConfig = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    };
+    if (typeId !== 4) {
+        {
+            const pustakaEarnings = await prisma.author_transaction.findMany({
+                select: {
+                    book_final_royalty_value_inr: true,
+                    converted_book_final_royalty_value_inr: true,
+                    order_date: true,
+                    order_type: true,
+                    book: {
+                        select: {
+                            book_title: true,
+                            language_tbl_relation: {
+                                select: {
+                                    language_name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    order_date: {
+                        gte: new Date(fyDates[0]),
+                        lte: new Date(fyDates[1]),
+                    },
+                    order_type: {
+                        in: bookType.id === 1 ? ["1", "2", "3"] : ["4", "5", "6", "8"],
+                    },
+                },
+            });
+            channelData["pustaka"] = {};
+            channelData["pustaka"]["title"] = "Pustaka";
+            channelData["pustaka"]["headers"] = [
+                "Order Date",
+                "Title",
+                "Language",
+                "Purchase Type",
+                "Royalty",
+            ];
+            channelData["pustaka"]["data"] = [];
+            for (const dataItem of pustakaEarnings) {
+                const insertItem = {
+                    orderDate: new Date(dataItem.order_date).toLocaleDateString("en-US", dateFormatConfig),
+                    title: dataItem.book.book_title,
+                    language: dataItem.book.language_tbl_relation.language_name,
+                    purchaseType: dataItem.order_type,
+                    royalty: (dataItem.book_final_royalty_value_inr +
+                        dataItem.converted_book_final_royalty_value_inr).toFixed(2),
+                };
+                channelData["pustaka"]["data"].push(insertItem);
+            }
+        }
+        {
+            const amazonEarnings = await prisma.amazon_transactions.findMany({
+                select: {
+                    final_royalty_value: true,
+                    invoice_date: true,
+                    units_purchased: true,
+                    payment_currency: true,
+                    book: {
+                        select: {
+                            book_title: true,
+                            language_tbl_relation: {
+                                select: {
+                                    language_name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    invoice_date: {
+                        gte: new Date(fyDates[0]),
+                        lte: new Date(fyDates[1]),
+                    },
+                    book: {
+                        type_of_book: bookType.id,
+                    },
+                },
+            });
+            if (bookType.id === 1) {
+                channelData["amazon"] = {};
+                channelData["amazon"]["title"] = "Amazon";
+                channelData["amazon"]["headers"] = [
+                    "Order Date",
+                    "Title",
+                    "Language",
+                    "Units",
+                    "Currency",
+                    "Royalty",
+                ];
+                channelData["amazon"]["data"] = [];
+                for (const dataItem of amazonEarnings) {
+                    const insertItem = {
+                        orderDate: new Date(dataItem.invoice_date).toLocaleDateString("en-US", dateFormatConfig),
+                        title: dataItem.book.book_title,
+                        language: dataItem.book.language_tbl_relation.language_name,
+                        units: dataItem.units_purchased,
+                        currency: dataItem.payment_currency,
+                        royalty: dataItem.final_royalty_value.toFixed(2),
+                    };
+                    channelData["amazon"]["data"].push(insertItem);
+                }
+            }
+            else {
+                const audibleEarnings = await prisma.audible_transactions.findMany({
+                    select: {
+                        final_royalty_value: true,
+                        transaction_date: true,
+                        book: {
+                            select: {
+                                book_title: true,
+                                language_tbl_relation: {
+                                    select: {
+                                        language_name: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    where: {
+                        author_id: authorId,
+                        copyright_owner: copyrightOwner,
+                        transaction_date: {
+                            gte: new Date(fyDates[0]),
+                            lte: new Date(fyDates[1]),
+                        },
+                        book: {
+                            type_of_book: bookType.id,
+                        },
+                    },
+                });
+                channelData["audible"] = {};
+                channelData["audible"]["title"] = "Audible";
+                channelData["audible"]["headers"] = [
+                    "Order Date",
+                    "Title",
+                    "Language",
+                    "Royalty",
+                ];
+                channelData["audible"]["data"] = [];
+                for (const dataItem of audibleEarnings) {
+                    const insertItem = {
+                        orderDate: new Date(dataItem.transaction_date).toLocaleDateString("en-US", dateFormatConfig),
+                        title: dataItem.book.book_title,
+                        language: dataItem.book.language_tbl_relation.language_name,
+                        royalty: (_a = dataItem.final_royalty_value) === null || _a === void 0 ? void 0 : _a.toFixed(2),
+                    };
+                    channelData["audible"]["data"].push(insertItem);
+                }
+            }
+        }
+        {
+            if (bookType.id === 1) {
+                const scribdEarnings = await prisma.scribd_transaction.findMany({
+                    select: {
+                        converted_inr: true,
+                        Payout_month: true,
+                        book: {
+                            select: {
+                                book_title: true,
+                                language_tbl_relation: {
+                                    select: {
+                                        language_name: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    where: {
+                        author_id: authorId,
+                        copyright_owner: copyrightOwner,
+                        Payout_month: {
+                            gte: new Date(fyDates[0]),
+                            lte: new Date(fyDates[1]),
+                        },
+                        book: {
+                            type_of_book: bookType.id,
+                        },
+                    },
+                });
+                channelData["scribd"] = {};
+                channelData["scribd"]["title"] = "Scribd";
+                channelData["scribd"]["headers"] = [
+                    "Order Date",
+                    "Title",
+                    "Language",
+                    "Royalty",
+                ];
+                channelData["scribd"]["data"] = [];
+                for (const dataItem of scribdEarnings) {
+                    const insertItem = {
+                        orderDate: new Date(dataItem.Payout_month).toLocaleDateString("en-US", dateFormatConfig),
+                        title: dataItem.book.book_title,
+                        language: dataItem.book.language_tbl_relation.language_name,
+                        royalty: dataItem.converted_inr.toFixed(2),
+                    };
+                    channelData["scribd"]["data"].push(insertItem);
+                }
+            }
+        }
+        {
+            const googleEarnings = await prisma.google_transactions.findMany({
+                select: {
+                    final_royalty_value: true,
+                    transaction_date: true,
+                    book: {
+                        select: {
+                            book_title: true,
+                            language_tbl_relation: {
+                                select: {
+                                    language_name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    transaction_date: {
+                        gte: new Date(fyDates[0]),
+                        lte: new Date(fyDates[1]),
+                    },
+                    book: {
+                        type_of_book: bookType.id,
+                    },
+                },
+            });
+            channelData["google"] = {};
+            channelData["google"]["title"] = "Google Books";
+            channelData["google"]["headers"] = [
+                "Order Date",
+                "Title",
+                "Language",
+                "Royalty",
+            ];
+            channelData["google"]["data"] = [];
+            for (const dataItem of googleEarnings) {
+                const insertItem = {
+                    orderDate: new Date(dataItem.transaction_date).toLocaleDateString("en-US", dateFormatConfig),
+                    title: dataItem.book.book_title,
+                    language: dataItem.book.language_tbl_relation.language_name,
+                    royalty: dataItem.final_royalty_value.toFixed(2),
+                };
+                channelData["google"]["data"].push(insertItem);
+            }
+        }
+        {
+            const storytelEarnings = await prisma.storytel_transactions.findMany({
+                select: {
+                    final_royalty_value: true,
+                    transaction_date: true,
+                    book: {
+                        select: {
+                            book_title: true,
+                            language_tbl_relation: {
+                                select: {
+                                    language_name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    transaction_date: {
+                        gte: new Date(fyDates[0]),
+                        lte: new Date(fyDates[1]),
+                    },
+                    book: {
+                        type_of_book: bookType.id,
+                    },
+                },
+            });
+            channelData["storytel"] = {};
+            channelData["storytel"]["title"] = "Storytel";
+            channelData["scribd"]["headers"] = [
+                "Order Date",
+                "Title",
+                "Language",
+                "Royalty",
+            ];
+            channelData["storytel"]["data"] = [];
+            for (const dataItem of storytelEarnings) {
+                const insertItem = {
+                    orderDate: new Date(dataItem.transaction_date).toLocaleDateString("en-US", dateFormatConfig),
+                    title: dataItem.book.book_title,
+                    language: dataItem.book.language_tbl_relation.language_name,
+                    royalty: (_b = dataItem.final_royalty_value) === null || _b === void 0 ? void 0 : _b.toFixed(2),
+                };
+                channelData["storytel"]["data"].push(insertItem);
+            }
+        }
+        {
+            const overdriveEarnings = await prisma.overdrive_transactions.findMany({
+                select: {
+                    final_royalty_value: true,
+                    transaction_date: true,
+                    book: {
+                        select: {
+                            book_title: true,
+                            language_tbl_relation: {
+                                select: {
+                                    language_name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    transaction_date: {
+                        gte: new Date(fyDates[0]),
+                        lte: new Date(fyDates[1]),
+                    },
+                    book: {
+                        type_of_book: bookType.id,
+                    },
+                },
+            });
+            channelData["overdrive"] = {};
+            channelData["overdrive"]["title"] = "Overdrive";
+            channelData["overdrive"]["headers"] = [
+                "Order Date",
+                "Title",
+                "Language",
+                "Royalty",
+            ];
+            channelData["overdrive"]["data"] = [];
+            for (const dataItem of overdriveEarnings) {
+                const insertItem = {
+                    orderDate: new Date(dataItem.transaction_date).toLocaleDateString("en-US", dateFormatConfig),
+                    title: dataItem.book.book_title,
+                    language: dataItem.book.language_tbl_relation.language_name,
+                    royalty: dataItem.final_royalty_value.toFixed(2),
+                };
+                channelData["overdrive"]["data"].push(insertItem);
+            }
+        }
+    }
+    else {
+        {
+            const pustakaEarnings = await prisma.author_transaction.findMany({
+                select: {
+                    book_final_royalty_value_inr: true,
+                    converted_book_final_royalty_value_inr: true,
+                    order_date: true,
+                    order_type: true,
+                    book: {
+                        select: {
+                            book_title: true,
+                            language_tbl_relation: {
+                                select: {
+                                    language_name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    order_date: {
+                        gte: new Date(fyDates[0]),
+                        lte: new Date(fyDates[1]),
+                    },
+                    order_type: {
+                        in: ["7", "9", "10", "11", "12"],
+                    },
+                },
+            });
+            channelData["pustaka"] = {};
+            channelData["pustaka"]["title"] = "Pustaka";
+            channelData["pustaka"]["headers"] = [
+                "Order Date",
+                "Title",
+                "Language",
+                "Purchase Type",
+                "Royalty",
+            ];
+            channelData["pustaka"]["data"] = [];
+            for (const dataItem of pustakaEarnings) {
+                const insertItem = {
+                    orderDate: new Date(dataItem.order_date).toLocaleDateString("en-US", dateFormatConfig),
+                    title: dataItem.book.book_title,
+                    language: dataItem.book.language_tbl_relation.language_name,
+                    purchaseType: dataItem.order_type,
+                    royalty: dataItem.book_final_royalty_value_inr +
+                        dataItem.converted_book_final_royalty_value_inr,
+                };
+                channelData["pustaka"]["data"].push(insertItem);
+            }
+        }
+    }
+    res.json(channelData);
 };
 exports.getPaymentsForMonth = getPaymentsForMonth;
 //# sourceMappingURL=royalty.js.map

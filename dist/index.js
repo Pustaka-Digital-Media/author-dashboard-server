@@ -6,6 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const https_1 = __importDefault(require("https"));
+const http_1 = __importDefault(require("http"));
 const dashboard_1 = __importDefault(require("./routes/dashboard"));
 const user_1 = __importDefault(require("./routes/user"));
 const books_1 = __importDefault(require("./routes/books"));
@@ -35,7 +39,15 @@ app.use("/books", books_1.default);
 app.use("/profile", profile_1.default);
 app.use("/royalty", royalty_1.default);
 app.use("/settlement", settlement_1.default);
-app.listen(port || 8080, () => {
-    console.log("⚡ server running on port 8080");
+const httpServer = http_1.default.createServer(app);
+const httpsServer = https_1.default.createServer({
+    key: fs_1.default.readFileSync(path_1.default.resolve(__dirname, "../certs/privatekey.key")),
+    cert: fs_1.default.readFileSync(path_1.default.resolve(__dirname, "../certs/ssl_certificate.crt")),
+}, app);
+httpServer.listen(port || 8080, () => {
+    console.log("HTTP Server running on port 80");
+});
+httpsServer.listen(443, () => {
+    console.log("HTTPS Server running on port 443");
 });
 //# sourceMappingURL=index.js.map
