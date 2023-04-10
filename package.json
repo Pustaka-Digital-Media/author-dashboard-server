@@ -14,7 +14,9 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
+    "prisma:generate": "prisma generate",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "schema": "prisma/schema.prisma"
