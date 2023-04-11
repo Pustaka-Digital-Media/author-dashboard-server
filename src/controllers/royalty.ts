@@ -689,6 +689,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         "Purchase Type",
         "Royalty",
       ];
+      channelData["pustaka"]["totalEarnings"] = 0;
       channelData["pustaka"]["data"] = [];
 
       for (const dataItem of pustakaEarnings) {
@@ -705,8 +706,10 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
             dataItem.converted_book_final_royalty_value_inr
           ).toFixed(2),
         };
+        console.log(insertItem);
 
         channelData["pustaka"]["data"].push(insertItem);
+        channelData["pustaka"]["totalEarnings"] += parseInt(insertItem.royalty);
       }
     }
     // Amazon / Audible
@@ -740,6 +743,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           },
         },
       });
+
       if (bookType.id === 1) {
         channelData["amazon"] = {};
         channelData["amazon"]["title"] = "Amazon";
@@ -751,6 +755,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           "Currency",
           "Royalty",
         ];
+        channelData["amazon"]["totalEarnings"] = 0;
         channelData["amazon"]["data"] = [];
 
         for (const dataItem of amazonEarnings) {
@@ -767,6 +772,9 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           };
 
           channelData["amazon"]["data"].push(insertItem);
+          channelData["amazon"]["totalEarnings"] += parseInt(
+            insertItem.royalty
+          );
         }
       } else {
         const audibleEarnings = await prisma.audible_transactions.findMany({
@@ -805,6 +813,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           "Language",
           "Royalty",
         ];
+        channelData["audible"]["totalEarnings"] = 0;
         channelData["audible"]["data"] = [];
 
         for (const dataItem of audibleEarnings) {
@@ -819,6 +828,9 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           };
 
           channelData["audible"]["data"].push(insertItem);
+          channelData["audible"]["totalEarnings"] += parseInt(
+            insertItem.royalty!
+          );
         }
       }
     }
@@ -861,6 +873,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           "Language",
           "Royalty",
         ];
+        channelData["scribd"]["totalEarnings"] = 0;
         channelData["scribd"]["data"] = [];
 
         for (const dataItem of scribdEarnings) {
@@ -875,6 +888,9 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           };
 
           channelData["scribd"]["data"].push(insertItem);
+          channelData["scribd"]["totalEarnings"] += parseInt(
+            insertItem.royalty
+          );
         }
       }
     }
@@ -916,6 +932,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         "Language",
         "Royalty",
       ];
+      channelData["google"]["totalEarnings"] = 0;
       channelData["google"]["data"] = [];
 
       for (const dataItem of googleEarnings) {
@@ -930,6 +947,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         };
 
         channelData["google"]["data"].push(insertItem);
+        channelData["google"]["totalEarnings"] += parseInt(insertItem.royalty);
       }
     }
     // Storytel
@@ -964,12 +982,13 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
 
       channelData["storytel"] = {};
       channelData["storytel"]["title"] = "Storytel";
-      channelData["scribd"]["headers"] = [
+      channelData["storytel"]["headers"] = [
         "Order Date",
         "Title",
         "Language",
         "Royalty",
       ];
+      channelData["storytel"]["totalEarnings"] = 0;
       channelData["storytel"]["data"] = [];
 
       for (const dataItem of storytelEarnings) {
@@ -984,6 +1003,9 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         };
 
         channelData["storytel"]["data"].push(insertItem);
+        channelData["storytel"]["totalEarnings"] += parseInt(
+          insertItem.royalty!
+        );
       }
     }
     // Overdrive
@@ -1024,6 +1046,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         "Language",
         "Royalty",
       ];
+      channelData["overdrive"]["totalEarnings"] = 0;
       channelData["overdrive"]["data"] = [];
 
       for (const dataItem of overdriveEarnings) {
@@ -1038,6 +1061,9 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         };
 
         channelData["overdrive"]["data"].push(insertItem);
+        channelData["overdrive"]["totalEarnings"] += parseInt(
+          insertItem.royalty
+        );
       }
     }
   }
@@ -1084,6 +1110,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         "Purchase Type",
         "Royalty",
       ];
+      channelData["pustaka"]["totalEarnings"] = 0;
       channelData["pustaka"]["data"] = [];
 
       for (const dataItem of pustakaEarnings) {
@@ -1095,12 +1122,14 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           title: dataItem.book.book_title,
           language: dataItem.book.language_tbl_relation.language_name,
           purchaseType: dataItem.order_type,
-          royalty:
+          royalty: (
             dataItem.book_final_royalty_value_inr +
-            dataItem.converted_book_final_royalty_value_inr,
+            dataItem.converted_book_final_royalty_value_inr
+          ).toFixed(2),
         };
 
         channelData["pustaka"]["data"].push(insertItem);
+        channelData["pustaka"]["totalEarnings"] += parseInt(insertItem.royalty);
       }
     }
   }
