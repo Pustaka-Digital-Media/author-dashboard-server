@@ -5,7 +5,7 @@ import { BOOK_TYPES, PAPERBACK_BOOK_TYPES } from "../utils/globals";
 import getMonthsForFy, { parseMonthString } from "../utils/getMonthsForFy";
 
 const prisma = new PrismaClient({
-  // log: ["query"],
+  log: ["query"],
 });
 
 export const getRoyaltySummaryData = async (req: Request, res: Response) => {
@@ -706,7 +706,6 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
             dataItem.converted_book_final_royalty_value_inr
           ).toFixed(2),
         };
-        console.log(insertItem);
 
         channelData["pustaka"]["data"].push(insertItem);
         channelData["pustaka"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -1096,7 +1095,8 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
             lte: new Date(fyDates[1]),
           },
           order_type: {
-            in: ["7", "9", "10", "11", "12"],
+            // in: ["7", "9", "10", "11", "12"],
+            in: ["7", "10", "11", "12"],
           },
         },
       });

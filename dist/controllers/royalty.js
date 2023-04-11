@@ -27,7 +27,9 @@ exports.getPaymentsForMonth = exports.getAllChannelSummaryData = exports.getRoya
 const client_1 = require("@prisma/client");
 const globals_1 = require("../utils/globals");
 const getMonthsForFy_1 = __importStar(require("../utils/getMonthsForFy"));
-const prisma = new client_1.PrismaClient({});
+const prisma = new client_1.PrismaClient({
+    log: ["query"],
+});
 const getRoyaltySummaryData = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
     const copyrightOwner = parseInt(req.body.copyrightOwner);
@@ -627,7 +629,6 @@ const getPaymentsForMonth = async (req, res) => {
                     royalty: (dataItem.book_final_royalty_value_inr +
                         dataItem.converted_book_final_royalty_value_inr).toFixed(2),
                 };
-                console.log(insertItem);
                 channelData["pustaka"]["data"].push(insertItem);
                 channelData["pustaka"]["totalEarnings"] += parseInt(insertItem.royalty);
             }
@@ -964,7 +965,7 @@ const getPaymentsForMonth = async (req, res) => {
                         lte: new Date(fyDates[1]),
                     },
                     order_type: {
-                        in: ["7", "9", "10", "11", "12"],
+                        in: ["7", "10", "11", "12"],
                     },
                 },
             });
