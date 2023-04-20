@@ -21,20 +21,20 @@ export const login = async (req: Request, res: Response) => {
     },
   });
 
-  const authorIdData = [];
-  const authorIds = await getAuthorIds(authorUser!.user_id.toString());
+  if (authorUser && authorUser.user_id) {
+    const authorIdData = [];
+    const authorIds = await getAuthorIds(authorUser!.user_id.toString());
 
-  for (let i = 0; i < authorIds.length; i++) {
-    const authorId = authorIds[i];
-    const authorName = await getAuthorName(authorId);
+    for (let i = 0; i < authorIds.length; i++) {
+      const authorId = authorIds[i];
+      const authorName = await getAuthorName(authorId);
 
-    authorIdData.push({
-      author_id: authorId,
-      author_name: authorName,
-    });
-  }
+      authorIdData.push({
+        author_id: authorId,
+        author_name: authorName,
+      });
+    }
 
-  if (authorUser) {
     res.json({
       status: 1,
       copyrightOwner: authorUser.user_id,

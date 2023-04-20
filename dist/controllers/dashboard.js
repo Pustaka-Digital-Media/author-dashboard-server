@@ -255,6 +255,7 @@ const getChannelBooks = async (req, res) => {
 exports.getChannelBooks = getChannelBooks;
 const getTransactionStatusSummary = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
+    const copyrightOwner = parseInt(req.body.copyrightOwner);
     var d = new Date().setDate(0);
     var prevMonthEnd = new Date(d);
     let transactionData = {};
@@ -444,6 +445,32 @@ const getTransactionStatusSummary = async (req, res) => {
             transactionData[transactionDetails.name][bookType.name] +=
                 amountData._sum.final_royalty_value;
         }
+    }
+    const bonusData = await prisma.publisher_tbl.findFirst({
+        where: {
+            copyright_owner: copyrightOwner.toString(),
+        },
+    });
+    for (const transactionDataKey of Object.keys(transactionData)) {
+        let transactionDataItem = transactionData[transactionDataKey];
+        if (transactionDataKey === "paid") {
+            const bonusValueAgg = await prisma.royalty_settlement.aggregate({
+                _sum: {
+                    bonus_value: true,
+                },
+                where: {
+                    copy_right_owner_id: copyrightOwner,
+                },
+            });
+            transactionDataItem.bonus = bonusValueAgg._sum.bonus_value || 0;
+        }
+        else {
+            transactionDataItem.bonus =
+                (transactionDataItem.ebooks + transactionDataItem.audiobooks) *
+                    ((bonusData === null || bonusData === void 0 ? void 0 : bonusData.bonus_percentage) || 0 / 100);
+            transactionDataItem.bonusPercent = (bonusData === null || bonusData === void 0 ? void 0 : bonusData.bonus_percentage) || null;
+        }
+        transactionData[transactionDataKey] = transactionDataItem;
     }
     res.json({
         name: authorName,

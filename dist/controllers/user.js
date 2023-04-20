@@ -21,17 +21,17 @@ const login = async (req, res) => {
             user_id: true,
         },
     });
-    const authorIdData = [];
-    const authorIds = await (0, getAuthorIds_1.default)(authorUser.user_id.toString());
-    for (let i = 0; i < authorIds.length; i++) {
-        const authorId = authorIds[i];
-        const authorName = await (0, getAuthorInfo_1.getAuthorName)(authorId);
-        authorIdData.push({
-            author_id: authorId,
-            author_name: authorName,
-        });
-    }
-    if (authorUser) {
+    if (authorUser && authorUser.user_id) {
+        const authorIdData = [];
+        const authorIds = await (0, getAuthorIds_1.default)(authorUser.user_id.toString());
+        for (let i = 0; i < authorIds.length; i++) {
+            const authorId = authorIds[i];
+            const authorName = await (0, getAuthorInfo_1.getAuthorName)(authorId);
+            authorIdData.push({
+                author_id: authorId,
+                author_name: authorName,
+            });
+        }
         res.json({
             status: 1,
             copyrightOwner: authorUser.user_id,
