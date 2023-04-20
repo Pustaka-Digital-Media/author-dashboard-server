@@ -468,8 +468,8 @@ const getTransactionStatusSummary = async (req, res) => {
             transactionDataItem.bonus =
                 (transactionDataItem.ebooks + transactionDataItem.audiobooks) *
                     (((bonusData === null || bonusData === void 0 ? void 0 : bonusData.bonus_percentage) || 0) / 100);
-            transactionDataItem.bonusPercent = (bonusData === null || bonusData === void 0 ? void 0 : bonusData.bonus_percentage) || null;
         }
+        transactionDataItem.bonusPercent = (bonusData === null || bonusData === void 0 ? void 0 : bonusData.bonus_percentage) || null;
         transactionData[transactionDataKey] = transactionDataItem;
     }
     res.json({
