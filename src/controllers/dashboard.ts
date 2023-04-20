@@ -549,7 +549,7 @@ export const getTransactionStatusSummary = async (
     } else {
       transactionDataItem.bonus =
         (transactionDataItem.ebooks + transactionDataItem.audiobooks) *
-        (bonusData?.bonus_percentage || 0 / 100);
+        ((bonusData?.bonus_percentage || 0) / 100);
       transactionDataItem.bonusPercent = bonusData?.bonus_percentage || null;
     }
 
