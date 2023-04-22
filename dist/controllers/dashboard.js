@@ -7,12 +7,14 @@ const globals_1 = require("../utils/globals");
 const prisma = new client_1.PrismaClient();
 const getBasicDetails = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
+    const copyrightOwner = parseInt(req.body.copyrightOwner);
     let authorData = { ebooks: {}, audiobooks: {}, paperback: {} };
     const authorName = await (0, getAuthorInfo_1.getAuthorName)(authorId);
     authorData.authorName = authorName;
     const authorEbookCount = await prisma.book_tbl.count({
         where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             type_of_book: 1,
         },
     });
@@ -30,6 +32,7 @@ const getBasicDetails = async (req, res) => {
     const authorAudiobookCount = await prisma.book_tbl.count({
         where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             type_of_book: 3,
         },
     });
@@ -47,6 +50,7 @@ const getBasicDetails = async (req, res) => {
     const authorPaperbackCount = await prisma.book_tbl.count({
         where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             type_of_book: 1,
             paper_back_flag: 1,
         },
@@ -57,6 +61,7 @@ const getBasicDetails = async (req, res) => {
         },
         where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             type_of_book: 1,
             paper_back_flag: 1,
         },

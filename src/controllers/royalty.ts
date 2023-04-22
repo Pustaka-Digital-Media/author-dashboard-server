@@ -56,6 +56,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
         google: null,
         storytel: null,
         overdrive: null,
+        kobo: null,
         total: null,
       };
     } else if (typeId === 3) {
@@ -155,7 +156,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
         }
       }
 
-      // Scribd
+      // Scribd / Kobo
       {
         if (bookType.id === 1) {
           const scribdEarnings = await prisma.scribd_transaction.aggregate({
@@ -177,6 +178,26 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
 
           channelData["scribd"] = scribdEarnings._sum.converted_inr;
           channelData["total"] += scribdEarnings._sum.converted_inr;
+
+          const koboEarnings = await prisma.kobo_transaction.aggregate({
+            _sum: {
+              paid_inr: true,
+            },
+            where: {
+              author_id: authorId,
+              copyright_owner: copyrightOwner,
+              transaction_date: {
+                gte: new Date(fyDates[0]),
+                lte: new Date(fyDates[1]),
+              },
+              book: {
+                type_of_book: bookType.id,
+              },
+            },
+          });
+
+          channelData["kobo"] = koboEarnings._sum.paid_inr;
+          channelData["total"] += koboEarnings._sum.paid_inr;
         }
       }
 
@@ -327,6 +348,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
       "Google Books",
       "Storytel",
       "Overdrive",
+      "Kobo",
       "Total",
     ];
   } else if (typeId === 3) {
@@ -539,6 +561,29 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
 
           channelData[bookType.name] += scribdEarnings._sum.converted_inr;
           channelData["total"] += scribdEarnings._sum.converted_inr;
+        }
+
+        // Kobo
+        {
+          const koboEarnings = await prisma.kobo_transaction.aggregate({
+            _sum: {
+              paid_inr: true,
+            },
+            where: {
+              author_id: authorId,
+              copyright_owner: copyrightOwner,
+              transaction_date: {
+                gte: new Date(fyDates[0]),
+                lte: new Date(fyDates[1]),
+              },
+              book: {
+                type_of_book: bookType.id,
+              },
+            },
+          });
+
+          channelData[bookType.name] += koboEarnings._sum.paid_inr;
+          channelData["total"] += koboEarnings._sum.paid_inr;
         }
       }
       // Only Audiobook Channels
@@ -1063,6 +1108,64 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         channelData["overdrive"]["totalEarnings"] += parseInt(
           insertItem.royalty
         );
+      }
+    }
+    // Kobo
+    {
+      if (bookType.id === 1) {
+        const koboEarnings = await prisma.kobo_transaction.findMany({
+          select: {
+            paid_inr: true,
+            transaction_date: true,
+            book: {
+              select: {
+                book_title: true,
+                language_tbl_relation: {
+                  select: {
+                    language_name: true,
+                  },
+                },
+              },
+            },
+          },
+          where: {
+            author_id: authorId,
+            copyright_owner: copyrightOwner,
+            transaction_date: {
+              gte: new Date(fyDates[0]),
+              lte: new Date(fyDates[1]),
+            },
+            book: {
+              type_of_book: bookType.id,
+            },
+          },
+        });
+
+        channelData["kobo"] = {};
+        channelData["kobo"]["title"] = "Kobo";
+        channelData["kobo"]["headers"] = [
+          "Order Date",
+          "Title",
+          "Language",
+          "Royalty",
+        ];
+        channelData["kobo"]["totalEarnings"] = 0;
+        channelData["kobo"]["data"] = [];
+
+        for (const dataItem of koboEarnings) {
+          const insertItem = {
+            orderDate: new Date(dataItem.transaction_date!).toLocaleDateString(
+              "en-US",
+              dateFormatConfig
+            ),
+            title: dataItem.book.book_title,
+            language: dataItem.book.language_tbl_relation.language_name,
+            royalty: dataItem.paid_inr.toFixed(2),
+          };
+
+          channelData["kobo"]["data"].push(insertItem);
+          channelData["kobo"]["totalEarnings"] += parseInt(insertItem.royalty);
+        }
       }
     }
   }

@@ -27,9 +27,7 @@ exports.getPaymentsForMonth = exports.getAllChannelSummaryData = exports.getRoya
 const client_1 = require("@prisma/client");
 const globals_1 = require("../utils/globals");
 const getMonthsForFy_1 = __importStar(require("../utils/getMonthsForFy"));
-const prisma = new client_1.PrismaClient({
-    log: ["query"],
-});
+const prisma = new client_1.PrismaClient({});
 const getRoyaltySummaryData = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
     const copyrightOwner = parseInt(req.body.copyrightOwner);
@@ -72,6 +70,7 @@ const getRoyaltySummaryData = async (req, res) => {
                 google: null,
                 storytel: null,
                 overdrive: null,
+                kobo: null,
                 total: null,
             };
         }
@@ -185,6 +184,24 @@ const getRoyaltySummaryData = async (req, res) => {
                     });
                     channelData["scribd"] = scribdEarnings._sum.converted_inr;
                     channelData["total"] += scribdEarnings._sum.converted_inr;
+                    const koboEarnings = await prisma.kobo_transaction.aggregate({
+                        _sum: {
+                            paid_inr: true,
+                        },
+                        where: {
+                            author_id: authorId,
+                            copyright_owner: copyrightOwner,
+                            transaction_date: {
+                                gte: new Date(fyDates[0]),
+                                lte: new Date(fyDates[1]),
+                            },
+                            book: {
+                                type_of_book: bookType.id,
+                            },
+                        },
+                    });
+                    channelData["kobo"] = koboEarnings._sum.paid_inr;
+                    channelData["total"] += koboEarnings._sum.paid_inr;
                 }
             }
             {
@@ -301,6 +318,7 @@ const getRoyaltySummaryData = async (req, res) => {
             "Google Books",
             "Storytel",
             "Overdrive",
+            "Kobo",
             "Total",
         ];
     }
@@ -485,6 +503,26 @@ const getAllChannelSummaryData = async (req, res) => {
                     });
                     channelData[bookType.name] += scribdEarnings._sum.converted_inr;
                     channelData["total"] += scribdEarnings._sum.converted_inr;
+                }
+                {
+                    const koboEarnings = await prisma.kobo_transaction.aggregate({
+                        _sum: {
+                            paid_inr: true,
+                        },
+                        where: {
+                            author_id: authorId,
+                            copyright_owner: copyrightOwner,
+                            transaction_date: {
+                                gte: new Date(fyDates[0]),
+                                lte: new Date(fyDates[1]),
+                            },
+                            book: {
+                                type_of_book: bookType.id,
+                            },
+                        },
+                    });
+                    channelData[bookType.name] += koboEarnings._sum.paid_inr;
+                    channelData["total"] += koboEarnings._sum.paid_inr;
                 }
             }
             else {
@@ -935,6 +973,57 @@ const getPaymentsForMonth = async (req, res) => {
                 };
                 channelData["overdrive"]["data"].push(insertItem);
                 channelData["overdrive"]["totalEarnings"] += parseInt(insertItem.royalty);
+            }
+        }
+        {
+            if (bookType.id === 1) {
+                const koboEarnings = await prisma.kobo_transaction.findMany({
+                    select: {
+                        paid_inr: true,
+                        transaction_date: true,
+                        book: {
+                            select: {
+                                book_title: true,
+                                language_tbl_relation: {
+                                    select: {
+                                        language_name: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    where: {
+                        author_id: authorId,
+                        copyright_owner: copyrightOwner,
+                        transaction_date: {
+                            gte: new Date(fyDates[0]),
+                            lte: new Date(fyDates[1]),
+                        },
+                        book: {
+                            type_of_book: bookType.id,
+                        },
+                    },
+                });
+                channelData["kobo"] = {};
+                channelData["kobo"]["title"] = "Kobo";
+                channelData["kobo"]["headers"] = [
+                    "Order Date",
+                    "Title",
+                    "Language",
+                    "Royalty",
+                ];
+                channelData["kobo"]["totalEarnings"] = 0;
+                channelData["kobo"]["data"] = [];
+                for (const dataItem of koboEarnings) {
+                    const insertItem = {
+                        orderDate: new Date(dataItem.transaction_date).toLocaleDateString("en-US", dateFormatConfig),
+                        title: dataItem.book.book_title,
+                        language: dataItem.book.language_tbl_relation.language_name,
+                        royalty: dataItem.paid_inr.toFixed(2),
+                    };
+                    channelData["kobo"]["data"].push(insertItem);
+                    channelData["kobo"]["totalEarnings"] += parseInt(insertItem.royalty);
+                }
             }
         }
     }
