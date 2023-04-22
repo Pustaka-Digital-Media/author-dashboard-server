@@ -288,7 +288,11 @@ const getTransactionStatusSummary = async (req, res) => {
                         equals: 1,
                     },
                 },
-                copyright_owner: authorId,
+                order_type: {
+                    in: ["1", "2", "3"],
+                },
+                copyright_owner: copyrightOwner,
+                author_id: authorId,
             },
         });
         transactionData[transactionDetails.name]["ebooks"] +=
@@ -309,7 +313,8 @@ const getTransactionStatusSummary = async (req, res) => {
                         equals: 1,
                     },
                 },
-                copyright_owner: authorId,
+                copyright_owner: copyrightOwner,
+                author_id: authorId,
             },
         });
         transactionData[transactionDetails.name]["ebooks"] +=
@@ -328,7 +333,8 @@ const getTransactionStatusSummary = async (req, res) => {
                 order_type: {
                     in: ["6", "9"],
                 },
-                copyright_owner: authorId,
+                copyright_owner: copyrightOwner,
+                author_id: authorId,
             },
         });
         transactionData[transactionDetails.name]["paperback"] +=
@@ -352,7 +358,8 @@ const getTransactionStatusSummary = async (req, res) => {
                                 equals: 3,
                             },
                         },
-                        copyright_owner: authorId,
+                        copyright_owner: copyrightOwner,
+                        author_id: authorId,
                     },
                 });
                 transactionData[transactionDetails.name]["audiobooks"] +=
@@ -375,7 +382,8 @@ const getTransactionStatusSummary = async (req, res) => {
                                 equals: 1,
                             },
                         },
-                        copyright_owner: authorId,
+                        copyright_owner: copyrightOwner,
+                        author_id: authorId,
                     },
                 });
                 transactionData[transactionDetails.name]["ebooks"] +=
@@ -397,7 +405,8 @@ const getTransactionStatusSummary = async (req, res) => {
                             equals: bookType.id,
                         },
                     },
-                    copyright_owner: authorId,
+                    copyright_owner: copyrightOwner,
+                    author_id: authorId,
                 },
             });
             transactionData[transactionDetails.name][bookType.name] +=
@@ -418,7 +427,8 @@ const getTransactionStatusSummary = async (req, res) => {
                             equals: bookType.id,
                         },
                     },
-                    copyright_owner: authorId,
+                    copyright_owner: copyrightOwner,
+                    author_id: authorId,
                 },
             });
             transactionData[transactionDetails.name][bookType.name] +=
@@ -439,7 +449,8 @@ const getTransactionStatusSummary = async (req, res) => {
                             equals: bookType.id,
                         },
                     },
-                    copyright_owner: authorId,
+                    copyright_owner: copyrightOwner,
+                    author_id: authorId,
                 },
             });
             transactionData[transactionDetails.name][bookType.name] +=

@@ -238,7 +238,7 @@ model author_tbl {
 
 model author_transaction {
   id                                     Int       @id @default(autoincrement())
-  order_id                               BigInt
+  order_id                               Int       @unique
   order_date                             DateTime? @db.Date
   book                                   book_tbl  @relation(fields: [book_id], references: [book_id])
   book_id                                Int       @unique
@@ -332,6 +332,7 @@ model book_tbl {
   storytel_transactions  storytel_transactions?
   pratilipi_books        pratilipi_books?
   amazon_paperback_books amazon_paperback_books?
+  pod_bookfair           pod_bookfair?
 }
 
 model book_types {
@@ -852,6 +853,21 @@ model pod_order_details {
   status               Int?
   price                Int?
   order_date           DateTime? @db.Date
+}
+
+model pod_bookfair {
+  id                  Int       @id @default(autoincrement())
+  order_id            Int
+  book                book_tbl  @relation(fields: [book_id], references: [book_id])
+  book_id             Int       @unique
+  author_id           Int?
+  copyright_owner     Int?
+  price               Int?
+  quantity            Int?
+  royalty_percentage  Int?
+  final_royalty_value Float?
+  remarks             String?   @db.Text
+  created_at          DateTime? @db.Date
 }
 
 model pod_processing {

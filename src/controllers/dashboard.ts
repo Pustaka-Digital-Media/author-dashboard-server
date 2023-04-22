@@ -340,7 +340,11 @@ export const getTransactionStatusSummary = async (
             equals: 1,
           },
         },
-        copyright_owner: authorId,
+        order_type: {
+          in: ["1", "2", "3"],
+        },
+        copyright_owner: copyrightOwner,
+        author_id: authorId,
       },
     });
 
@@ -365,7 +369,8 @@ export const getTransactionStatusSummary = async (
             equals: 1,
           },
         },
-        copyright_owner: authorId,
+        copyright_owner: copyrightOwner,
+        author_id: authorId,
       },
     });
 
@@ -387,7 +392,8 @@ export const getTransactionStatusSummary = async (
         order_type: {
           in: ["6", "9"],
         },
-        copyright_owner: authorId,
+        copyright_owner: copyrightOwner,
+        author_id: authorId,
       },
     });
 
@@ -416,7 +422,8 @@ export const getTransactionStatusSummary = async (
                 equals: 3,
               },
             },
-            copyright_owner: authorId,
+            copyright_owner: copyrightOwner,
+            author_id: authorId,
           },
         });
 
@@ -441,7 +448,8 @@ export const getTransactionStatusSummary = async (
                 equals: 1,
               },
             },
-            copyright_owner: authorId,
+            copyright_owner: copyrightOwner,
+            author_id: authorId,
           },
         });
 
@@ -467,7 +475,8 @@ export const getTransactionStatusSummary = async (
               equals: bookType.id,
             },
           },
-          copyright_owner: authorId,
+          copyright_owner: copyrightOwner,
+          author_id: authorId,
         },
       });
 
@@ -492,7 +501,8 @@ export const getTransactionStatusSummary = async (
               equals: bookType.id,
             },
           },
-          copyright_owner: authorId,
+          copyright_owner: copyrightOwner,
+          author_id: authorId,
         },
       });
 
@@ -517,7 +527,8 @@ export const getTransactionStatusSummary = async (
               equals: bookType.id,
             },
           },
-          copyright_owner: authorId,
+          copyright_owner: copyrightOwner,
+          author_id: authorId,
         },
       });
 
