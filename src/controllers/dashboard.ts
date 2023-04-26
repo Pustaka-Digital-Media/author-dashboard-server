@@ -10,7 +10,9 @@ import {
   PUSTAKA_URL,
 } from "../utils/globals";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  // log: ["query"],
+});
 
 export const getBasicDetails = async (req: Request, res: Response) => {
   const authorId = parseInt(req.body.authorId);
@@ -98,6 +100,9 @@ export const getChannelBooks = async (req: Request, res: Response) => {
   booksData["ebooks"] = {};
   booksData["audiobooks"] = {};
   booksData["paperback"] = {};
+  booksData["ebooks"]["total"] = 0;
+  booksData["audiobooks"]["total"] = 0;
+  booksData["paperback"]["total"] = 0;
 
   // Author Name
   const authorName = await getAuthorName(authorId);
@@ -113,10 +118,12 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     });
     booksData["ebooks"]["pustaka"] = {};
     booksData["ebooks"]["pustaka"]["name"] = "Pustaka";
-    booksData["ebooks"]["pustaka"]["count"] = pustakaEBooksCount;
     booksData["ebooks"]["pustaka"]["image_url"] = S3_URL + "/pustaka-icon.svg";
     booksData["ebooks"]["pustaka"]["url"] =
       PUSTAKA_URL + "/home/author/" + channelLinks?.url_name;
+
+    booksData["ebooks"]["pustaka"]["count"] = pustakaEBooksCount;
+    booksData["ebooks"]["total"] += pustakaEBooksCount;
 
     // Scribd
     const scribdBooksCount = await prisma.scribd_books.count({
@@ -129,9 +136,11 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     });
     booksData["ebooks"]["scribd"] = {};
     booksData["ebooks"]["scribd"]["name"] = "Scribd";
-    booksData["ebooks"]["scribd"]["count"] = scribdBooksCount;
     booksData["ebooks"]["scribd"]["image_url"] = S3_URL + "/scrib-icon.svg";
     booksData["ebooks"]["scribd"]["url"] = channelLinks?.scribd_link;
+
+    booksData["ebooks"]["scribd"]["count"] = scribdBooksCount;
+    booksData["ebooks"]["total"] += scribdBooksCount;
 
     // New Channels (Hardcoded)
     const pratilipiBooksCount = await prisma.pratilipi_books.count({
@@ -162,11 +171,13 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     });
     booksData["audiobooks"]["pustaka"] = {};
     booksData["audiobooks"]["pustaka"]["name"] = "Pustaka";
-    booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
     booksData["audiobooks"]["pustaka"]["image_url"] =
       S3_URL + "/pustaka-icon.svg";
     booksData["audiobooks"]["pustaka"]["url"] =
       PUSTAKA_URL + "/home/author/" + channelLinks?.url_name;
+
+    booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
+    booksData["audiobooks"]["total"] += pustakaAudiobooksCount;
 
     booksData["audiobooks"]["pratilipiFM"] = {};
     booksData["audiobooks"]["pratilipiFM"]["name"] = "Pratilipi FM";
@@ -186,9 +197,11 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     });
     booksData["paperback"]["pustaka"] = {};
     booksData["paperback"]["pustaka"]["name"] = "Pustaka";
-    booksData["paperback"]["pustaka"]["count"] = paperbackCount;
     booksData["paperback"]["pustaka"]["image_url"] =
       S3_URL + "/pustaka-icon.svg";
+
+    booksData["paperback"]["pustaka"]["count"] = paperbackCount;
+    booksData["paperback"]["total"] += paperbackCount;
 
     // Hardcoded (Amazon, Flipkart)
     booksData["paperback"]["amazon"] = {};
@@ -220,10 +233,12 @@ export const getChannelBooks = async (req: Request, res: Response) => {
         });
         booksData[bookType.name]["audible"] = {};
         booksData[bookType.name]["audible"]["name"] = "Audible";
-        booksData[bookType.name]["audible"]["count"] = audibleBooksCount;
         booksData[bookType.name]["audible"]["image_url"] =
           S3_URL + "/audible-icon.svg";
         booksData[bookType.name]["audible"]["url"] = channelLinks?.audible_link;
+
+        booksData[bookType.name]["audible"]["count"] = audibleBooksCount;
+        booksData[bookType.name]["total"] += audibleBooksCount;
       } else {
         // Amazon
         const amazonBooksCount = await prisma.amazon_books.count({
@@ -236,10 +251,12 @@ export const getChannelBooks = async (req: Request, res: Response) => {
         });
         booksData[bookType.name]["amazon"] = {};
         booksData[bookType.name]["amazon"]["name"] = "Amazon";
-        booksData[bookType.name]["amazon"]["count"] = amazonBooksCount;
         booksData[bookType.name]["amazon"]["image_url"] =
           S3_URL + "/amazon-icon.svg";
         booksData[bookType.name]["amazon"]["url"] = channelLinks?.amazon_link;
+
+        booksData[bookType.name]["amazon"]["count"] = amazonBooksCount;
+        booksData[bookType.name]["total"] += amazonBooksCount;
       }
 
       // Google Books
@@ -253,11 +270,13 @@ export const getChannelBooks = async (req: Request, res: Response) => {
       });
       booksData[bookType.name]["google"] = {};
       booksData[bookType.name]["google"]["name"] = "Google Books";
-      booksData[bookType.name]["google"]["count"] = googleBooksCount;
       booksData[bookType.name]["google"]["image_url"] =
         S3_URL + "/google-books-icon.svg";
       booksData[bookType.name]["google"]["url"] =
         channelLinks?.googlebooks_link;
+
+      booksData[bookType.name]["google"]["count"] = googleBooksCount;
+      booksData[bookType.name]["total"] += googleBooksCount;
 
       // Storytel
       const storytelBooksCount = await prisma.storytel_books.count({
@@ -270,10 +289,12 @@ export const getChannelBooks = async (req: Request, res: Response) => {
       });
       booksData[bookType.name]["storytel"] = {};
       booksData[bookType.name]["storytel"]["name"] = "StoryTel";
-      booksData[bookType.name]["storytel"]["count"] = storytelBooksCount;
       booksData[bookType.name]["storytel"]["image_url"] =
         S3_URL + "/storytel-icon.svg";
       booksData[bookType.name]["storytel"]["url"] = channelLinks?.storytel_link;
+
+      booksData[bookType.name]["storytel"]["count"] = storytelBooksCount;
+      booksData[bookType.name]["total"] += storytelBooksCount;
 
       // Overdrive
       const overdriveBooksCount = await prisma.overdrive_books.count({
@@ -286,11 +307,13 @@ export const getChannelBooks = async (req: Request, res: Response) => {
       });
       booksData[bookType.name]["overdrive"] = {};
       booksData[bookType.name]["overdrive"]["name"] = "Overdrive";
-      booksData[bookType.name]["overdrive"]["count"] = overdriveBooksCount;
       booksData[bookType.name]["overdrive"]["image_url"] =
         S3_URL + "/overdrive-icon.svg";
       booksData[bookType.name]["overdrive"]["url"] =
         channelLinks?.overdrive_link;
+
+      booksData[bookType.name]["overdrive"]["count"] = overdriveBooksCount;
+      booksData[bookType.name]["total"] += overdriveBooksCount;
     }
   }
 
