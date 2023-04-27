@@ -125,9 +125,6 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
               gte: new Date(fyDates[0]),
               lte: new Date(fyDates[1]),
             },
-            book: {
-              type_of_book: bookType.id,
-            },
           },
         });
         if (bookType.id === 1) {
@@ -144,9 +141,6 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
               transaction_date: {
                 gte: new Date(fyDates[0]),
                 lte: new Date(fyDates[1]),
-              },
-              book: {
-                type_of_book: bookType.id,
               },
             },
           });
@@ -170,9 +164,6 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
                 gte: new Date(fyDates[0]),
                 lte: new Date(fyDates[1]),
               },
-              book: {
-                type_of_book: bookType.id,
-              },
             },
           });
 
@@ -189,9 +180,6 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
               transaction_date: {
                 gte: new Date(fyDates[0]),
                 lte: new Date(fyDates[1]),
-              },
-              book: {
-                type_of_book: bookType.id,
               },
             },
           });
@@ -214,9 +202,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
               gte: new Date(fyDates[0]),
               lte: new Date(fyDates[1]),
             },
-            book: {
-              type_of_book: bookType.id,
-            },
+            type_of_book: bookType.id,
           },
         });
 
@@ -237,9 +223,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
               gte: new Date(fyDates[0]),
               lte: new Date(fyDates[1]),
             },
-            book: {
-              type_of_book: bookType.id,
-            },
+            type_of_book: bookType.id,
           },
         });
 
@@ -261,9 +245,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
                 gte: new Date(fyDates[0]),
                 lte: new Date(fyDates[1]),
               },
-              book: {
-                type_of_book: bookType.id,
-              },
+              type_of_book: bookType.id,
             },
           }
         );

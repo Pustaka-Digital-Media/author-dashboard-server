@@ -134,9 +134,6 @@ const getRoyaltySummaryData = async (req, res) => {
                             gte: new Date(fyDates[0]),
                             lte: new Date(fyDates[1]),
                         },
-                        book: {
-                            type_of_book: bookType.id,
-                        },
                     },
                 });
                 if (bookType.id === 1) {
@@ -154,9 +151,6 @@ const getRoyaltySummaryData = async (req, res) => {
                             transaction_date: {
                                 gte: new Date(fyDates[0]),
                                 lte: new Date(fyDates[1]),
-                            },
-                            book: {
-                                type_of_book: bookType.id,
                             },
                         },
                     });
@@ -177,9 +171,6 @@ const getRoyaltySummaryData = async (req, res) => {
                                 gte: new Date(fyDates[0]),
                                 lte: new Date(fyDates[1]),
                             },
-                            book: {
-                                type_of_book: bookType.id,
-                            },
                         },
                     });
                     channelData["scribd"] = scribdEarnings._sum.converted_inr;
@@ -194,9 +185,6 @@ const getRoyaltySummaryData = async (req, res) => {
                             transaction_date: {
                                 gte: new Date(fyDates[0]),
                                 lte: new Date(fyDates[1]),
-                            },
-                            book: {
-                                type_of_book: bookType.id,
                             },
                         },
                     });
@@ -216,9 +204,7 @@ const getRoyaltySummaryData = async (req, res) => {
                             gte: new Date(fyDates[0]),
                             lte: new Date(fyDates[1]),
                         },
-                        book: {
-                            type_of_book: bookType.id,
-                        },
+                        type_of_book: bookType.id,
                     },
                 });
                 channelData["google"] = googleEarnings._sum.final_royalty_value;
@@ -236,9 +222,7 @@ const getRoyaltySummaryData = async (req, res) => {
                             gte: new Date(fyDates[0]),
                             lte: new Date(fyDates[1]),
                         },
-                        book: {
-                            type_of_book: bookType.id,
-                        },
+                        type_of_book: bookType.id,
                     },
                 });
                 channelData["storytel"] = storytelEarnings._sum.final_royalty_value;
@@ -256,9 +240,7 @@ const getRoyaltySummaryData = async (req, res) => {
                             gte: new Date(fyDates[0]),
                             lte: new Date(fyDates[1]),
                         },
-                        book: {
-                            type_of_book: bookType.id,
-                        },
+                        type_of_book: bookType.id,
                     },
                 });
                 channelData["overdrive"] = overdriveEarnings._sum.final_royalty_value;

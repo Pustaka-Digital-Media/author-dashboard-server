@@ -586,6 +586,7 @@ model google_transactions {
   final_royalty_value          Float    @db.Float
   user_id                      Int
   copyright_owner              Int?
+  type_of_book                 Int?
   status                       String?  @db.VarChar(10)
 }
 
@@ -791,6 +792,7 @@ model overdrive_transactions {
   final_royalty_value Float    @db.Float
   user_id             Int
   copyright_owner     Int?
+  type_of_book        Int
   status              String   @db.VarChar(10)
 }
 
@@ -1102,6 +1104,7 @@ model storytel_transactions {
   copyright_owner             Int?
   final_royalty_value         Float?    @db.Float
   transaction_date            DateTime? @db.Date
+  type_of_book                Int
   status                      String?   @db.VarChar(1)
 }
 

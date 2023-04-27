@@ -361,12 +361,7 @@ export const getTransactionStatusSummary = async (
           equals: transactionDetails.status,
         },
         order_date: {
-          gt: prevMonthEnd,
-        },
-        book: {
-          type_of_book: {
-            equals: 1,
-          },
+          lt: prevMonthEnd,
         },
         order_type: {
           in: ["1", "2", "3"],
@@ -391,11 +386,6 @@ export const getTransactionStatusSummary = async (
       where: {
         status: {
           equals: transactionDetails.status,
-        },
-        book: {
-          type_of_book: {
-            equals: 1,
-          },
         },
         copyright_owner: copyrightOwner,
         author_id: authorId,
@@ -445,11 +435,6 @@ export const getTransactionStatusSummary = async (
             status: {
               equals: transactionDetails.status,
             },
-            book: {
-              type_of_book: {
-                equals: 3,
-              },
-            },
             copyright_owner: copyrightOwner,
             author_id: authorId,
           },
@@ -470,11 +455,6 @@ export const getTransactionStatusSummary = async (
           where: {
             status: {
               equals: transactionDetails.status === "O" ? "R" : "P",
-            },
-            book: {
-              type_of_book: {
-                equals: 1,
-              },
             },
             copyright_owner: copyrightOwner,
             author_id: authorId,
@@ -498,11 +478,7 @@ export const getTransactionStatusSummary = async (
           status: {
             equals: transactionDetails.status,
           },
-          book: {
-            type_of_book: {
-              equals: bookType.id,
-            },
-          },
+          type_of_book: bookType.id,
           copyright_owner: copyrightOwner,
           author_id: authorId,
         },
@@ -524,11 +500,7 @@ export const getTransactionStatusSummary = async (
           status: {
             equals: transactionDetails.status,
           },
-          book: {
-            type_of_book: {
-              equals: bookType.id,
-            },
-          },
+          type_of_book: bookType.id,
           copyright_owner: copyrightOwner,
           author_id: authorId,
         },
@@ -550,11 +522,7 @@ export const getTransactionStatusSummary = async (
           status: {
             equals: transactionDetails.status,
           },
-          book: {
-            type_of_book: {
-              equals: bookType.id,
-            },
-          },
+          type_of_book: bookType.id,
           copyright_owner: copyrightOwner,
           author_id: authorId,
         },
