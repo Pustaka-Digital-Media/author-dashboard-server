@@ -606,6 +606,7 @@ const getPaymentsForMonth = async (req, res) => {
                     converted_book_final_royalty_value_inr: true,
                     order_date: true,
                     order_type: true,
+                    pay_status: true,
                     book: {
                         select: {
                             book_title: true,
@@ -637,6 +638,7 @@ const getPaymentsForMonth = async (req, res) => {
                 "Language",
                 "Purchase Type",
                 "Royalty",
+                "Status",
             ];
             channelData["pustaka"]["totalEarnings"] = 0;
             channelData["pustaka"]["data"] = [];
@@ -648,6 +650,7 @@ const getPaymentsForMonth = async (req, res) => {
                     purchaseType: dataItem.order_type,
                     royalty: (dataItem.book_final_royalty_value_inr +
                         dataItem.converted_book_final_royalty_value_inr).toFixed(2),
+                    status: dataItem.pay_status === "O" ? "Pending" : "Paid",
                 };
                 channelData["pustaka"]["data"].push(insertItem);
                 channelData["pustaka"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -660,6 +663,7 @@ const getPaymentsForMonth = async (req, res) => {
                     invoice_date: true,
                     units_purchased: true,
                     payment_currency: true,
+                    status: true,
                     book: {
                         select: {
                             book_title: true,
@@ -693,6 +697,7 @@ const getPaymentsForMonth = async (req, res) => {
                     "Units",
                     "Currency",
                     "Royalty",
+                    "Status",
                 ];
                 channelData["amazon"]["totalEarnings"] = 0;
                 channelData["amazon"]["data"] = [];
@@ -704,6 +709,7 @@ const getPaymentsForMonth = async (req, res) => {
                         units: dataItem.units_purchased,
                         currency: dataItem.payment_currency,
                         royalty: dataItem.final_royalty_value.toFixed(2),
+                        status: dataItem.status === "R" ? "Pending" : "Paid",
                     };
                     channelData["amazon"]["data"].push(insertItem);
                     channelData["amazon"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -714,6 +720,7 @@ const getPaymentsForMonth = async (req, res) => {
                     select: {
                         final_royalty_value: true,
                         transaction_date: true,
+                        status: true,
                         book: {
                             select: {
                                 book_title: true,
@@ -744,6 +751,7 @@ const getPaymentsForMonth = async (req, res) => {
                     "Title",
                     "Language",
                     "Royalty",
+                    "Status",
                 ];
                 channelData["audible"]["totalEarnings"] = 0;
                 channelData["audible"]["data"] = [];
@@ -753,6 +761,7 @@ const getPaymentsForMonth = async (req, res) => {
                         title: dataItem.book.book_title,
                         language: dataItem.book.language_tbl_relation.language_name,
                         royalty: (_a = dataItem.final_royalty_value) === null || _a === void 0 ? void 0 : _a.toFixed(2),
+                        status: dataItem.status === "O" ? "Pending" : "Paid",
                     };
                     channelData["audible"]["data"].push(insertItem);
                     channelData["audible"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -765,6 +774,7 @@ const getPaymentsForMonth = async (req, res) => {
                     select: {
                         converted_inr: true,
                         Payout_month: true,
+                        status: true,
                         book: {
                             select: {
                                 book_title: true,
@@ -795,6 +805,7 @@ const getPaymentsForMonth = async (req, res) => {
                     "Title",
                     "Language",
                     "Royalty",
+                    "Status",
                 ];
                 channelData["scribd"]["totalEarnings"] = 0;
                 channelData["scribd"]["data"] = [];
@@ -804,6 +815,7 @@ const getPaymentsForMonth = async (req, res) => {
                         title: dataItem.book.book_title,
                         language: dataItem.book.language_tbl_relation.language_name,
                         royalty: dataItem.converted_inr.toFixed(2),
+                        status: dataItem.status === "O" ? "Pending" : "Paid",
                     };
                     channelData["scribd"]["data"].push(insertItem);
                     channelData["scribd"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -815,6 +827,7 @@ const getPaymentsForMonth = async (req, res) => {
                 select: {
                     final_royalty_value: true,
                     transaction_date: true,
+                    status: true,
                     book: {
                         select: {
                             book_title: true,
@@ -845,6 +858,7 @@ const getPaymentsForMonth = async (req, res) => {
                 "Title",
                 "Language",
                 "Royalty",
+                "Status",
             ];
             channelData["google"]["totalEarnings"] = 0;
             channelData["google"]["data"] = [];
@@ -854,6 +868,7 @@ const getPaymentsForMonth = async (req, res) => {
                     title: dataItem.book.book_title,
                     language: dataItem.book.language_tbl_relation.language_name,
                     royalty: dataItem.final_royalty_value.toFixed(2),
+                    status: dataItem.status === "O" ? "Pending" : "Paid",
                 };
                 channelData["google"]["data"].push(insertItem);
                 channelData["google"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -864,6 +879,7 @@ const getPaymentsForMonth = async (req, res) => {
                 select: {
                     final_royalty_value: true,
                     transaction_date: true,
+                    status: true,
                     book: {
                         select: {
                             book_title: true,
@@ -894,6 +910,7 @@ const getPaymentsForMonth = async (req, res) => {
                 "Title",
                 "Language",
                 "Royalty",
+                "Status",
             ];
             channelData["storytel"]["totalEarnings"] = 0;
             channelData["storytel"]["data"] = [];
@@ -903,6 +920,7 @@ const getPaymentsForMonth = async (req, res) => {
                     title: dataItem.book.book_title,
                     language: dataItem.book.language_tbl_relation.language_name,
                     royalty: (_b = dataItem.final_royalty_value) === null || _b === void 0 ? void 0 : _b.toFixed(2),
+                    status: dataItem.status === "O" ? "Pending" : "Paid",
                 };
                 channelData["storytel"]["data"].push(insertItem);
                 channelData["storytel"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -913,6 +931,7 @@ const getPaymentsForMonth = async (req, res) => {
                 select: {
                     final_royalty_value: true,
                     transaction_date: true,
+                    status: true,
                     book: {
                         select: {
                             book_title: true,
@@ -943,6 +962,7 @@ const getPaymentsForMonth = async (req, res) => {
                 "Title",
                 "Language",
                 "Royalty",
+                "Status",
             ];
             channelData["overdrive"]["totalEarnings"] = 0;
             channelData["overdrive"]["data"] = [];
@@ -952,6 +972,7 @@ const getPaymentsForMonth = async (req, res) => {
                     title: dataItem.book.book_title,
                     language: dataItem.book.language_tbl_relation.language_name,
                     royalty: dataItem.final_royalty_value.toFixed(2),
+                    status: dataItem.status === "O" ? "Pending" : "Paid",
                 };
                 channelData["overdrive"]["data"].push(insertItem);
                 channelData["overdrive"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -963,6 +984,7 @@ const getPaymentsForMonth = async (req, res) => {
                     select: {
                         paid_inr: true,
                         transaction_date: true,
+                        status: true,
                         book: {
                             select: {
                                 book_title: true,
@@ -993,6 +1015,7 @@ const getPaymentsForMonth = async (req, res) => {
                     "Title",
                     "Language",
                     "Royalty",
+                    "Status",
                 ];
                 channelData["kobo"]["totalEarnings"] = 0;
                 channelData["kobo"]["data"] = [];
@@ -1002,6 +1025,7 @@ const getPaymentsForMonth = async (req, res) => {
                         title: dataItem.book.book_title,
                         language: dataItem.book.language_tbl_relation.language_name,
                         royalty: dataItem.paid_inr.toFixed(2),
+                        status: dataItem.status === "O" ? "Pending" : "Paid",
                     };
                     channelData["kobo"]["data"].push(insertItem);
                     channelData["kobo"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -1019,6 +1043,7 @@ const getPaymentsForMonth = async (req, res) => {
                     order_type: true,
                     order_id: true,
                     comments: true,
+                    pay_status: true,
                     book: {
                         select: {
                             book_id: true,
@@ -1053,6 +1078,7 @@ const getPaymentsForMonth = async (req, res) => {
                 "Purchase Type",
                 "Royalty",
                 "Remarks",
+                "Status",
             ];
             channelData["pustakaOnlineWhatsapp"]["totalEarnings"] = 0;
             channelData["pustakaOnlineWhatsapp"]["data"] = [];
@@ -1074,6 +1100,7 @@ const getPaymentsForMonth = async (req, res) => {
                     royalty: (dataItem.book_final_royalty_value_inr +
                         dataItem.converted_book_final_royalty_value_inr).toFixed(2),
                     remarks: dataItem.comments,
+                    status: dataItem.pay_status === "O" ? "Pending" : "Paid",
                 };
                 channelData["pustakaOnlineWhatsapp"]["data"].push(insertItem);
                 channelData["pustakaOnlineWhatsapp"]["totalEarnings"] += parseInt(insertItem.royalty);
@@ -1087,6 +1114,7 @@ const getPaymentsForMonth = async (req, res) => {
                     order_id: true,
                     order_date: true,
                     comments: true,
+                    pay_status: true,
                 },
                 where: {
                     author_id: authorId,
@@ -1108,6 +1136,7 @@ const getPaymentsForMonth = async (req, res) => {
                 "Quantity",
                 "Price",
                 "Royalty",
+                "Status",
             ];
             channelData["pustakaBookFair"]["totalEarnings"] = 0;
             channelData["pustakaBookFair"]["data"] = [];
@@ -1134,6 +1163,7 @@ const getPaymentsForMonth = async (req, res) => {
                         quantity: bookItem.quantity,
                         price: (_c = bookItem.price) === null || _c === void 0 ? void 0 : _c.toFixed(2),
                         royalty: (_d = bookItem.final_royalty_value) === null || _d === void 0 ? void 0 : _d.toFixed(2),
+                        status: dataItem.pay_status === "O" ? "Pending" : "Paid",
                     };
                     channelData["pustakaBookFair"]["data"].push(insertItem);
                     channelData["pustakaBookFair"]["totalEarnings"] += parseInt(insertItem.royalty);

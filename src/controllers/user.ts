@@ -8,18 +8,40 @@ import { getAuthorName } from "../utils/getAuthorInfo";
 const prisma = new PrismaClient();
 
 export const login = async (req: Request, res: Response) => {
-  const userData = req.body;
+  const loginType = req.body.loginType;
+  const userData = req.body.userData;
 
-  const authorUser = await prisma.users_tbl.findFirst({
-    where: {
-      email: userData.email,
-      password: md5(userData.password),
-      user_type: "2",
-    },
-    select: {
-      user_id: true,
-    },
-  });
+  let authorUser: any;
+  if (loginType === "google") {
+    authorUser = await prisma.users_tbl.findFirst({
+      where: {
+        email: userData.email,
+        user_type: "2",
+      },
+    });
+
+    if (authorUser?.channel !== "google") {
+      const updateChannel = await prisma.users_tbl.update({
+        where: {
+          user_id: authorUser?.user_id,
+        },
+        data: {
+          channel: "google",
+        },
+      });
+    }
+  } else {
+    authorUser = await prisma.users_tbl.findFirst({
+      where: {
+        email: userData.email,
+        password: md5(userData.password),
+        user_type: "2",
+      },
+      select: {
+        user_id: true,
+      },
+    });
+  }
 
   if (authorUser && authorUser.user_id) {
     const authorIdData = [];
