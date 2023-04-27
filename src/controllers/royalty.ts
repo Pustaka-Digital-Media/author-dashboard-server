@@ -1249,7 +1249,6 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         where: {
           author_id: authorId,
           copyright_owner: copyrightOwner,
-          book_id: 0,
           order_date: {
             gte: new Date(fyDates[0]),
             lte: new Date(fyDates[1]),

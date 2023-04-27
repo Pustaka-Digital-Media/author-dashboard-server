@@ -12,7 +12,7 @@ export const BOOK_TYPES_ALL = [
 export const PAPERBACK_BOOK_TYPES = [
   { id: 7, name: "pustakaOnline" },
   { id: 9, name: "pustakaBookFair" },
-  { id: 10, name: "amazon" },
+  { id: 10, name: "pustakaWhatsapp" },
   // { id: 11, name: "flipkart" },
   // { id: 12, name: "ingram" },
 ];

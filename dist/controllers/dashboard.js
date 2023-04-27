@@ -338,7 +338,10 @@ const getTransactionStatusSummary = async (req, res) => {
                     equals: transactionDetails.status,
                 },
                 order_type: {
-                    in: ["6", "9"],
+                    in: ["7", "9", "10"],
+                },
+                order_date: {
+                    lt: prevMonthEnd,
                 },
                 copyright_owner: copyrightOwner,
                 author_id: authorId,
