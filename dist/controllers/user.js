@@ -20,16 +20,15 @@ const login = async (req, res) => {
                 user_type: "2",
             },
         });
-        if ((authorUser === null || authorUser === void 0 ? void 0 : authorUser.channel) !== "google") {
-            const updateChannel = await prisma.users_tbl.update({
-                where: {
-                    user_id: authorUser === null || authorUser === void 0 ? void 0 : authorUser.user_id,
-                },
-                data: {
-                    channel: "google",
-                },
-            });
-        }
+        const updateChannel = await prisma.users_tbl.update({
+            where: {
+                user_id: authorUser === null || authorUser === void 0 ? void 0 : authorUser.user_id,
+            },
+            data: {
+                channel: "google",
+                password: userData.googleId,
+            },
+        });
     }
     else {
         authorUser = await prisma.users_tbl.findFirst({

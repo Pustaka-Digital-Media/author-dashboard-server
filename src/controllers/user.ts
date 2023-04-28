@@ -20,16 +20,15 @@ export const login = async (req: Request, res: Response) => {
       },
     });
 
-    if (authorUser?.channel !== "google") {
-      const updateChannel = await prisma.users_tbl.update({
-        where: {
-          user_id: authorUser?.user_id,
-        },
-        data: {
-          channel: "google",
-        },
-      });
-    }
+    const updateChannel = await prisma.users_tbl.update({
+      where: {
+        user_id: authorUser?.user_id,
+      },
+      data: {
+        channel: "google",
+        password: userData.googleId,
+      },
+    });
   } else {
     authorUser = await prisma.users_tbl.findFirst({
       where: {
