@@ -11,9 +11,8 @@ exports.BOOK_TYPES_ALL = [
     { id: 10, name: "paperback" },
 ];
 exports.PAPERBACK_BOOK_TYPES = [
-    { id: 7, name: "pustakaOnline" },
-    { id: 9, name: "pustakaBookFair" },
-    { id: 10, name: "pustakaWhatsapp" },
+    { id: ["7", "10"], name: "pustakaOnlineWhatsapp" },
+    { id: ["9"], name: "pustakaBookFair" },
 ];
 exports.TRANSACTION_STATUS = [
     { name: "pending", status: "O" },

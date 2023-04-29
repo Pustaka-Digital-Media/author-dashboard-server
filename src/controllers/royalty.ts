@@ -70,7 +70,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
       };
     } else if (typeId === 4) {
       channelDataOrder = {
-        pustakaOnline: null,
+        pustakaOnlineWhatsapp: null,
         pustakaBookFair: null,
         amazon: null,
         total: null,
@@ -293,7 +293,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
               lte: new Date(fyDates[1]),
             },
             order_type: {
-              equals: bookTypeData.id.toString(),
+              in: bookTypeData.id,
             },
           },
         });
