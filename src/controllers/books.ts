@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 export const getLanguageGraphData = async (req: Request, res: Response) => {
   const graphData: any = {};
   const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
   const typeOfBook = parseInt(req.body.typeOfBook);
 
   const authorName = await getAuthorName(authorId);
@@ -36,6 +37,7 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
         languageCount = await prisma.book_tbl.count({
           where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             language: language.language_id,
             type_of_book: 1,
             paper_back_flag: 1,
@@ -45,6 +47,7 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
         languageCount = await prisma.book_tbl.count({
           where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             language: language.language_id,
             type_of_book: typeOfBook,
           },
@@ -54,6 +57,7 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
       languageCount = await prisma.book_tbl.count({
         where: {
           author_name: authorId,
+          copyright_owner: copyrightOwner,
           language: language.language_id,
         },
       });
@@ -79,6 +83,7 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
 export const getGenreGraphData = async (req: Request, res: Response) => {
   const graphData: any = {};
   const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
   const typeOfBook = parseInt(req.body.typeOfBook);
 
   const authorName = await getAuthorName(authorId);
@@ -100,6 +105,7 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
         genreCount = await prisma.book_tbl.count({
           where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             genre_id: genre.genre_id,
             type_of_book: 1,
             paper_back_flag: 1,
@@ -109,6 +115,7 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
         genreCount = await prisma.book_tbl.count({
           where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             genre_id: genre.genre_id,
             type_of_book: typeOfBook,
           },
@@ -118,6 +125,7 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
       genreCount = await prisma.book_tbl.count({
         where: {
           author_name: authorId,
+          copyright_owner: copyrightOwner,
           genre_id: genre.genre_id,
         },
       });
@@ -147,6 +155,7 @@ export const prepareBooksPublishedPagination = async (
   const result: any = {};
 
   const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
   const typeOfBook = parseInt(req.body.typeOfBook);
   const limit = parseInt(req.body.limit);
 
@@ -155,6 +164,7 @@ export const prepareBooksPublishedPagination = async (
     booksCount = await prisma.book_tbl.count({
       where: {
         author_name: authorId,
+        copyright_owner: copyrightOwner,
         type_of_book: typeOfBook,
       },
     });
@@ -177,6 +187,7 @@ export const getPaginatedPublishedBooks = async (
   res: Response
 ) => {
   const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
   const typeOfBook = parseInt(req.body.typeOfBook);
   const currentPage = parseInt(req.body.currentPage);
   const limit = parseInt(req.body.limit);
@@ -185,6 +196,7 @@ export const getPaginatedPublishedBooks = async (
 
   const whereClause: any = {
     author_name: authorId,
+    copyright_owner: copyrightOwner,
   };
   if (typeOfBook) {
     if (typeOfBook === 4) {
@@ -249,6 +261,7 @@ export const getPaginatedPublishedBooks = async (
         });
         linkData["amazon"] = {};
         linkData["amazon"]["url"] =
+          amazonLinkData?.asin &&
           "https://amazon.in/dp/" + amazonLinkData?.asin;
         linkData["amazon"]["image_url"] = S3_URL + "/kindle-table-icon.svg";
       }
@@ -264,6 +277,7 @@ export const getPaginatedPublishedBooks = async (
         });
         linkData["scribd"] = {};
         linkData["scribd"]["url"] =
+          scribdLinkData?.doc_id &&
           "https://scribd.com/book/" + scribdLinkData?.doc_id;
         linkData["scribd"]["image_url"] = S3_URL + "/scrib-table-icon.svg";
       }
@@ -295,6 +309,18 @@ export const getPaginatedPublishedBooks = async (
       linkData["google"] = {};
       linkData["google"]["url"] = googleLinkData?.play_store_link;
       linkData["google"]["image_url"] = S3_URL + "/google-table-icon.svg";
+
+      const storytelLinkData = await prisma.storytel_books.findUnique({
+        where: {
+          book_id: book.book_id,
+        },
+        select: {
+          title: true,
+        },
+      });
+      linkData["storytel"] = {};
+      linkData["storytel"]["url"] = "javascript:void(0)";
+      linkData["storytel"]["image_url"] = S3_URL + "/storytel-table-icon.svg";
 
       if (typeOfBook !== 3) {
         const overdriveLinkData = await prisma.overdrive_books.findUnique({
@@ -342,6 +368,7 @@ export const getBooksPublishedGraphData = async (
   res: Response
 ) => {
   const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
 
   (BigInt.prototype as any).toJSON = function () {
     const int = Number.parseInt(this.toString());
@@ -357,6 +384,7 @@ export const getBooksPublishedGraphData = async (
       book_tbl
     WHERE
       book_tbl.author_name = ${authorId}
+      book_tbl.copyrightOwner = ${copyrightOwner}
       AND book_tbl.activated_at IS NOT NULL
       AND book_tbl.status = 1
     GROUP BY published_date
@@ -373,12 +401,14 @@ export const prepareGiftBooksPagination = async (
   const result: any = {};
 
   const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
   const limit = parseInt(req.body.limit);
 
   let booksCount: number;
   booksCount = await prisma.book_tbl.count({
     where: {
       author_name: authorId,
+      copyright_owner: copyrightOwner,
     },
   });
 
@@ -390,6 +420,7 @@ export const prepareGiftBooksPagination = async (
 
 export const getPaginatedGiftBooks = async (req: Request, res: Response) => {
   const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
   const currentPage = parseInt(req.body.currentPage);
   const limit = parseInt(req.body.limit);
 
@@ -400,6 +431,7 @@ export const getPaginatedGiftBooks = async (req: Request, res: Response) => {
     take: limit,
     where: {
       author_name: authorId,
+      copyright_owner: copyrightOwner,
     },
     select: {
       book_id: true,

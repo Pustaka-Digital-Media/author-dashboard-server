@@ -24,11 +24,12 @@ const getBasicDetails = async (req, res) => {
         },
         where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             type_of_book: 1,
         },
     });
     authorData.ebooks.count = authorEbookCount;
-    authorData.ebooks.pages = authorEbookPages._sum.number_of_page;
+    authorData.ebooks.pages = authorEbookPages._sum.number_of_page || 0;
     const authorAudiobookCount = await prisma.book_tbl.count({
         where: {
             author_name: authorId,
@@ -42,6 +43,7 @@ const getBasicDetails = async (req, res) => {
         },
         where: {
             author_name: authorId,
+            copyright_owner: copyrightOwner,
             type_of_book: 3,
         },
     });
@@ -76,6 +78,7 @@ const getBasicDetails = async (req, res) => {
 exports.getBasicDetails = getBasicDetails;
 const getChannelBooks = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
+    const copyrightOwner = parseInt(req.body.copyrightOwner);
     const includeTypes = req.body.includeTypes || [1, 3, 4];
     let booksData = {};
     booksData["ebooks"] = {};
@@ -90,7 +93,9 @@ const getChannelBooks = async (req, res) => {
         const pustakaEBooksCount = await prisma.book_tbl.count({
             where: {
                 author_name: authorId,
+                copyright_owner: copyrightOwner,
                 type_of_book: 1,
+                status: true,
             },
         });
         booksData["ebooks"]["pustaka"] = {};
@@ -103,6 +108,7 @@ const getChannelBooks = async (req, res) => {
         const scribdBooksCount = await prisma.scribd_books.count({
             where: {
                 author_id: authorId,
+                copyright_owner: copyrightOwner,
                 book: {
                     type_of_book: 1,
                 },
@@ -135,6 +141,7 @@ const getChannelBooks = async (req, res) => {
         const pustakaAudiobooksCount = await prisma.book_tbl.count({
             where: {
                 author_name: authorId,
+                copyright_owner: copyrightOwner,
                 type_of_book: 3,
             },
         });
@@ -158,6 +165,7 @@ const getChannelBooks = async (req, res) => {
         const paperbackCount = await prisma.book_tbl.count({
             where: {
                 author_name: authorId,
+                copyright_owner: copyrightOwner,
                 paper_back_flag: 1,
             },
         });
@@ -172,11 +180,6 @@ const getChannelBooks = async (req, res) => {
         booksData["paperback"]["amazon"]["count"] = 0;
         booksData["paperback"]["amazon"]["image_url"] =
             globals_1.S3_URL + "/amazon-paperback-icon.svg";
-        booksData["paperback"]["flipkart"] = {};
-        booksData["paperback"]["flipkart"]["name"] = "Flipkart";
-        booksData["paperback"]["flipkart"]["count"] = 0;
-        booksData["paperback"]["flipkart"]["image_url"] =
-            globals_1.S3_URL + "/flipkart-icon.svg";
     }
     for (let i = 0; i < globals_1.BOOK_TYPES.length; i++) {
         const bookType = globals_1.BOOK_TYPES[i];
@@ -185,6 +188,7 @@ const getChannelBooks = async (req, res) => {
                 const audibleBooksCount = await prisma.audible_books.count({
                     where: {
                         author_id: authorId,
+                        copyright_owner: copyrightOwner,
                         book: {
                             type_of_book: bookType.id,
                         },
@@ -202,6 +206,7 @@ const getChannelBooks = async (req, res) => {
                 const amazonBooksCount = await prisma.amazon_books.count({
                     where: {
                         author_id: authorId,
+                        copyright_owner: copyrightOwner,
                         book: {
                             type_of_book: bookType.id,
                         },
@@ -218,6 +223,7 @@ const getChannelBooks = async (req, res) => {
             const googleBooksCount = await prisma.google_books.count({
                 where: {
                     author_id: authorId,
+                    copyright_owner: copyrightOwner,
                     book: {
                         type_of_book: bookType.id,
                     },
@@ -234,6 +240,7 @@ const getChannelBooks = async (req, res) => {
             const storytelBooksCount = await prisma.storytel_books.count({
                 where: {
                     author_id: authorId,
+                    copyright_owner: copyrightOwner,
                     book: {
                         type_of_book: bookType.id,
                     },
@@ -249,6 +256,7 @@ const getChannelBooks = async (req, res) => {
             const overdriveBooksCount = await prisma.overdrive_books.count({
                 where: {
                     author_id: authorId,
+                    copyright_owner: copyrightOwner,
                     book: {
                         type_of_book: bookType.id,
                     },
