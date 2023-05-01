@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://pustakastaging:pustaka%23staging@pustaka-staging.cokqzfziewag.ap-south-1.rds.amazonaws.com:3306/pustaka_staging_v5"
+  url      = "mysql://pustakaprodv2:ebooks%23Pustaka@http://pustaka-prod-db-v2.cokqzfziewag.ap-south-1.rds.amazonaws.com:3306/pustaka_prod_v2"
 }
 
 model amazon_books {
