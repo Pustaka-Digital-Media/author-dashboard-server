@@ -41,6 +41,7 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
             language: language.language_id,
             type_of_book: 1,
             paper_back_flag: 1,
+            status: true,
           },
         });
       } else {
@@ -50,6 +51,10 @@ export const getLanguageGraphData = async (req: Request, res: Response) => {
             copyright_owner: copyrightOwner,
             language: language.language_id,
             type_of_book: typeOfBook,
+            status: true,
+            cost: {
+              not: 3,
+            },
           },
         });
       }
@@ -109,6 +114,7 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
             genre_id: genre.genre_id,
             type_of_book: 1,
             paper_back_flag: 1,
+            status: true,
           },
         });
       } else {
@@ -118,6 +124,10 @@ export const getGenreGraphData = async (req: Request, res: Response) => {
             copyright_owner: copyrightOwner,
             genre_id: genre.genre_id,
             type_of_book: typeOfBook,
+            status: true,
+            cost: {
+              not: 3,
+            },
           },
         });
       }

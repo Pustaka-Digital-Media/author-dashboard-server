@@ -95,6 +95,9 @@ const getChannelBooks = async (req, res) => {
                 author_name: authorId,
                 copyright_owner: copyrightOwner,
                 type_of_book: 1,
+                cost: {
+                    not: 3,
+                },
                 status: true,
             },
         });
