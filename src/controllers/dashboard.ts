@@ -29,6 +29,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
       author_name: authorId,
       copyright_owner: copyrightOwner,
       type_of_book: 1,
+      status: true,
     },
   });
   const authorEbookPages = await prisma.book_tbl.aggregate({
@@ -39,6 +40,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
       author_name: authorId,
       copyright_owner: copyrightOwner,
       type_of_book: 1,
+      status: true,
     },
   });
   authorData.ebooks.count = authorEbookCount;
@@ -50,6 +52,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
       author_name: authorId,
       copyright_owner: copyrightOwner,
       type_of_book: 3,
+      status: true,
     },
   });
   const authorAudiobookPages = await prisma.book_tbl.aggregate({
@@ -60,6 +63,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
       author_name: authorId,
       copyright_owner: copyrightOwner,
       type_of_book: 3,
+      status: true,
     },
   });
   authorData.audiobooks.count = authorAudiobookCount;
@@ -72,6 +76,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
       copyright_owner: copyrightOwner,
       type_of_book: 1,
       paper_back_flag: 1,
+      status: true,
     },
   });
   const authorPaperbackPages = await prisma.book_tbl.aggregate({
@@ -83,6 +88,7 @@ export const getBasicDetails = async (req: Request, res: Response) => {
       copyright_owner: copyrightOwner,
       type_of_book: 1,
       paper_back_flag: 1,
+      status: true,
     },
   });
   authorData.paperback.count = authorPaperbackCount;

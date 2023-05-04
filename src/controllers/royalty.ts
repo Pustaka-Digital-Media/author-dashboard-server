@@ -417,6 +417,14 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
           },
         });
 
+        // if (bookType.id === 1) {
+        //   console.log(fyDates[0], fyDates[1]);
+        //   console.log(
+        //     fyData.key,
+        //     (pustakaEarnings._sum.book_final_royalty_value_inr || 0) +
+        //       (pustakaEarnings._sum.converted_book_final_royalty_value_inr || 0)
+        //   );
+        // }
         channelData[bookType.name] +=
           (pustakaEarnings._sum.book_final_royalty_value_inr || 0) +
           (pustakaEarnings._sum.converted_book_final_royalty_value_inr || 0);
@@ -438,9 +446,7 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
               gte: new Date(fyDates[0]),
               lte: new Date(fyDates[1]),
             },
-            book: {
-              type_of_book: bookType.id,
-            },
+            type_of_book: bookType.id,
           },
         });
 
@@ -461,9 +467,7 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
               gte: new Date(fyDates[0]),
               lte: new Date(fyDates[1]),
             },
-            book: {
-              type_of_book: bookType.id,
-            },
+            type_of_book: bookType.id,
           },
         });
 
@@ -485,13 +489,15 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
                 gte: new Date(fyDates[0]),
                 lte: new Date(fyDates[1]),
               },
-              book: {
-                type_of_book: bookType.id,
-              },
+              type_of_book: bookType.id,
             },
           }
         );
 
+        // if (bookType.id === 1) {
+        //   console.log(fyDates[0], fyDates[1]);
+        //   console.log(fyData.key, overdriveEarnings._sum.final_royalty_value);
+        // }
         channelData[bookType.name] +=
           overdriveEarnings._sum.final_royalty_value;
         channelData["total"] += overdriveEarnings._sum.final_royalty_value;

@@ -396,9 +396,7 @@ const getAllChannelSummaryData = async (req, res) => {
                             gte: new Date(fyDates[0]),
                             lte: new Date(fyDates[1]),
                         },
-                        book: {
-                            type_of_book: bookType.id,
-                        },
+                        type_of_book: bookType.id,
                     },
                 });
                 channelData[bookType.name] += googleEarnings._sum.final_royalty_value;
@@ -416,9 +414,7 @@ const getAllChannelSummaryData = async (req, res) => {
                             gte: new Date(fyDates[0]),
                             lte: new Date(fyDates[1]),
                         },
-                        book: {
-                            type_of_book: bookType.id,
-                        },
+                        type_of_book: bookType.id,
                     },
                 });
                 channelData[bookType.name] += storytelEarnings._sum.final_royalty_value;
@@ -436,9 +432,7 @@ const getAllChannelSummaryData = async (req, res) => {
                             gte: new Date(fyDates[0]),
                             lte: new Date(fyDates[1]),
                         },
-                        book: {
-                            type_of_book: bookType.id,
-                        },
+                        type_of_book: bookType.id,
                     },
                 });
                 channelData[bookType.name] +=
