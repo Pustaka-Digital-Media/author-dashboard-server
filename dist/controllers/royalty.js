@@ -59,6 +59,9 @@ const getRoyaltySummaryData = async (req, res) => {
     for (let i = 0; i < dates.length; i++) {
         const fyData = dates[i];
         const fyDates = fyData.value.split(",");
+        const startDate = new Date(fyDates[0]);
+        const endDateOld = new Date(fyDates[1]);
+        const endDate = new Date(endDateOld.getTime() + Math.abs(endDateOld.getTimezoneOffset() * 60000));
         const channelData = {};
         channelData["total"] = 0;
         let channelDataOrder = {};
@@ -103,8 +106,8 @@ const getRoyaltySummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         order_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         order_type: {
                             in: bookType.id === 1
@@ -131,8 +134,8 @@ const getRoyaltySummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         invoice_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                     },
                 });
@@ -149,8 +152,8 @@ const getRoyaltySummaryData = async (req, res) => {
                             author_id: authorId,
                             copyright_owner: copyrightOwner,
                             transaction_date: {
-                                gte: new Date(fyDates[0]),
-                                lte: new Date(fyDates[1]),
+                                gte: startDate,
+                                lte: endDate,
                             },
                         },
                     });
@@ -168,8 +171,8 @@ const getRoyaltySummaryData = async (req, res) => {
                             author_id: authorId,
                             copyright_owner: copyrightOwner,
                             Payout_month: {
-                                gte: new Date(fyDates[0]),
-                                lte: new Date(fyDates[1]),
+                                gte: startDate,
+                                lte: endDate,
                             },
                         },
                     });
@@ -183,8 +186,8 @@ const getRoyaltySummaryData = async (req, res) => {
                             author_id: authorId,
                             copyright_owner: copyrightOwner,
                             transaction_date: {
-                                gte: new Date(fyDates[0]),
-                                lte: new Date(fyDates[1]),
+                                gte: startDate,
+                                lte: endDate,
                             },
                         },
                     });
@@ -201,8 +204,8 @@ const getRoyaltySummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         transaction_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         type_of_book: bookType.id,
                     },
@@ -219,8 +222,8 @@ const getRoyaltySummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         transaction_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         type_of_book: bookType.id,
                     },
@@ -237,8 +240,8 @@ const getRoyaltySummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         transaction_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         type_of_book: bookType.id,
                     },
@@ -268,8 +271,8 @@ const getRoyaltySummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         order_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         order_type: {
                             in: bookTypeData.id,
@@ -357,6 +360,9 @@ const getAllChannelSummaryData = async (req, res) => {
         channelData["total"] = 0;
         const fyData = dates[i];
         const fyDates = fyData.value.split(",");
+        const startDate = new Date(fyDates[0]);
+        const endDateOld = new Date(fyDates[1]);
+        const endDate = new Date(endDateOld.getTime() + Math.abs(endDateOld.getTimezoneOffset() * 60000));
         for (let j = 0; j < globals_1.BOOK_TYPES.length; j++) {
             const bookType = globals_1.BOOK_TYPES[j];
             {
@@ -369,8 +375,8 @@ const getAllChannelSummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         order_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         order_type: {
                             in: bookType.id === 1 ? ["1", "2", "3"] : ["4", "5", "6", "8"],
@@ -393,8 +399,8 @@ const getAllChannelSummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         transaction_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         type_of_book: bookType.id,
                     },
@@ -411,8 +417,8 @@ const getAllChannelSummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         transaction_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         type_of_book: bookType.id,
                     },
@@ -429,8 +435,8 @@ const getAllChannelSummaryData = async (req, res) => {
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         transaction_date: {
-                            gte: new Date(fyDates[0]),
-                            lte: new Date(fyDates[1]),
+                            gte: startDate,
+                            lte: endDate,
                         },
                         type_of_book: bookType.id,
                     },
@@ -449,11 +455,8 @@ const getAllChannelSummaryData = async (req, res) => {
                             author_id: authorId,
                             copyright_owner: copyrightOwner,
                             invoice_date: {
-                                gte: new Date(fyDates[0]),
-                                lte: new Date(fyDates[1]),
-                            },
-                            book: {
-                                type_of_book: bookType.id,
+                                gte: startDate,
+                                lte: endDate,
                             },
                         },
                     });
@@ -469,11 +472,8 @@ const getAllChannelSummaryData = async (req, res) => {
                             author_id: authorId,
                             copyright_owner: copyrightOwner,
                             Payout_month: {
-                                gte: new Date(fyDates[0]),
-                                lte: new Date(fyDates[1]),
-                            },
-                            book: {
-                                type_of_book: bookType.id,
+                                gte: startDate,
+                                lte: endDate,
                             },
                         },
                     });
@@ -489,11 +489,8 @@ const getAllChannelSummaryData = async (req, res) => {
                             author_id: authorId,
                             copyright_owner: copyrightOwner,
                             transaction_date: {
-                                gte: new Date(fyDates[0]),
-                                lte: new Date(fyDates[1]),
-                            },
-                            book: {
-                                type_of_book: bookType.id,
+                                gte: startDate,
+                                lte: endDate,
                             },
                         },
                     });
@@ -511,11 +508,8 @@ const getAllChannelSummaryData = async (req, res) => {
                             author_id: authorId,
                             copyright_owner: copyrightOwner,
                             transaction_date: {
-                                gte: new Date(fyDates[0]),
-                                lte: new Date(fyDates[1]),
-                            },
-                            book: {
-                                type_of_book: bookType.id,
+                                gte: startDate,
+                                lte: endDate,
                             },
                         },
                     });
@@ -535,8 +529,8 @@ const getAllChannelSummaryData = async (req, res) => {
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
-                        gte: new Date(fyDates[0]),
-                        lte: new Date(fyDates[1]),
+                        gte: startDate,
+                        lte: endDate,
                     },
                     order_type: {
                         in: ["7", "9", "10", "11", "12"],
