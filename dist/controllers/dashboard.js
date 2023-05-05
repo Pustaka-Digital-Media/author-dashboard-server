@@ -17,6 +17,9 @@ const getBasicDetails = async (req, res) => {
             copyright_owner: copyrightOwner,
             type_of_book: 1,
             status: true,
+            cost: {
+                not: 3,
+            },
         },
     });
     const authorEbookPages = await prisma.book_tbl.aggregate({
@@ -28,6 +31,9 @@ const getBasicDetails = async (req, res) => {
             copyright_owner: copyrightOwner,
             type_of_book: 1,
             status: true,
+            cost: {
+                not: 3,
+            },
         },
     });
     authorData.ebooks.count = authorEbookCount;

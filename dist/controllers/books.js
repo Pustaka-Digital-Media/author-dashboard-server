@@ -60,6 +60,7 @@ const getLanguageGraphData = async (req, res) => {
                     author_name: authorId,
                     copyright_owner: copyrightOwner,
                     language: language.language_id,
+                    status: true,
                 },
             });
         }
@@ -128,6 +129,7 @@ const getGenreGraphData = async (req, res) => {
                     author_name: authorId,
                     copyright_owner: copyrightOwner,
                     genre_id: genre.genre_id,
+                    status: true,
                 },
             });
         }
@@ -159,6 +161,7 @@ const prepareBooksPublishedPagination = async (req, res) => {
                 author_name: authorId,
                 copyright_owner: copyrightOwner,
                 type_of_book: typeOfBook,
+                status: true,
             },
         });
     }
@@ -184,6 +187,7 @@ const getPaginatedPublishedBooks = async (req, res) => {
     const whereClause = {
         author_name: authorId,
         copyright_owner: copyrightOwner,
+        status: true,
     };
     if (typeOfBook) {
         if (typeOfBook === 4) {
@@ -374,6 +378,7 @@ const prepareGiftBooksPagination = async (req, res) => {
         where: {
             author_name: authorId,
             copyright_owner: copyrightOwner,
+            status: true,
         },
     });
     result.totalPages = Math.floor(booksCount / limit) || 1;
@@ -393,6 +398,7 @@ const getPaginatedGiftBooks = async (req, res) => {
         where: {
             author_name: authorId,
             copyright_owner: copyrightOwner,
+            status: true,
         },
         select: {
             book_id: true,
