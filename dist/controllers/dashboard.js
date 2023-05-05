@@ -182,6 +182,7 @@ const getChannelBooks = async (req, res) => {
                 author_name: authorId,
                 copyright_owner: copyrightOwner,
                 paper_back_flag: 1,
+                status: true,
             },
         });
         booksData["paperback"]["pustaka"] = {};
