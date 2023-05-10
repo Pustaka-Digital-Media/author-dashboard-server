@@ -1158,6 +1158,64 @@ const getPaymentsForMonth = async (req, res) => {
                 }
             }
         }
+        {
+            const amazonEarnings = await prisma.author_transaction.findMany({
+                select: {
+                    book_final_royalty_value_inr: true,
+                    converted_book_final_royalty_value_inr: true,
+                    order_date: true,
+                    order_type: true,
+                    order_id: true,
+                    comments: true,
+                    pay_status: true,
+                    book: {
+                        select: {
+                            book_id: true,
+                            book_title: true,
+                            language_tbl_relation: {
+                                select: {
+                                    language_name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    order_date: {
+                        gte: new Date(fyDates[0]),
+                        lte: new Date(fyDates[1]),
+                    },
+                    order_type: {
+                        in: ["11"],
+                    },
+                },
+            });
+            channelData["amazon"] = {};
+            channelData["amazon"]["title"] = "Amazon";
+            channelData["amazon"]["headers"] = [
+                "Order Date",
+                "Title",
+                "Royalty",
+                "Remarks",
+                "Status",
+            ];
+            channelData["amazon"]["totalEarnings"] = 0;
+            channelData["amazon"]["data"] = [];
+            for (const dataItem of amazonEarnings) {
+                const insertItem = {
+                    orderDate: new Date(dataItem.order_date).toLocaleDateString("en-US", dateFormatConfig),
+                    title: dataItem.book.book_title,
+                    royalty: (dataItem.book_final_royalty_value_inr +
+                        dataItem.converted_book_final_royalty_value_inr).toFixed(2),
+                    remarks: dataItem.comments,
+                    status: dataItem.pay_status === "O" ? "Pending" : "Paid",
+                };
+                channelData["amazon"]["data"].push(insertItem);
+                channelData["amazon"]["totalEarnings"] += parseInt(insertItem.royalty);
+            }
+        }
     }
     res.json(channelData);
 };

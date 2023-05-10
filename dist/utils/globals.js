@@ -13,6 +13,7 @@ exports.BOOK_TYPES_ALL = [
 exports.PAPERBACK_BOOK_TYPES = [
     { id: ["7", "10"], name: "pustakaOnlineWhatsapp" },
     { id: ["9"], name: "pustakaBookFair" },
+    { id: ["11"], name: "amazon" },
 ];
 exports.TRANSACTION_STATUS = [
     { name: "pending", status: "O" },
