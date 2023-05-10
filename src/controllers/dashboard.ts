@@ -216,6 +216,7 @@ export const getChannelBooks = async (req: Request, res: Response) => {
         author_name: authorId,
         copyright_owner: copyrightOwner,
         paper_back_flag: 1,
+        status: true,
       },
     });
     booksData["paperback"]["pustaka"] = {};
