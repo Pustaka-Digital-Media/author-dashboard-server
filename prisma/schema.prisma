@@ -961,24 +961,31 @@ model razorpay_requests {
 }
 
 model royalty_settlement {
-  id                       Int      @id @default(autoincrement())
-  copy_right_owner_id      Int
-  author_id                Int?
-  settlement_date          DateTime @db.Date
-  settlement_amount        Float
-  tds_amount               Float?
-  payment_type             String   @db.VarChar(20)
-  bank_transaction_details String   @db.LongText
-  comments                 String   @db.LongText
-  pustaka                  Float?
-  amazon                   Float?
-  kobo                     Float?
-  scribd                   Float?
-  google                   Float?
-  overdrive                Float?
-  storytel                 Float?
-  audible                  Float?   @db.Float
-  bonus_value              Float?   @db.Float
+  id                         Int      @id @default(autoincrement())
+  copy_right_owner_id        Int
+  author_id                  Int?
+  settlement_date            DateTime @db.Date
+  settlement_amount          Float
+  tds_amount                 Float?
+  payment_type               String   @db.VarChar(20)
+  bank_transaction_details   String   @db.LongText
+  comments                   String   @db.LongText
+  pustaka_ebooks             Float?
+  pustaka_audiobooks         Float?
+  pustaka_online_paperback   Float?
+  pustaka_whatsapp_paperback Float?
+  pustaka_bookfair_paperback Float?
+  amazon                     Float?
+  kobo                       Float?
+  scribd                     Float?
+  google_ebooks              Float?
+  google_audiobooks          Float?
+  overdrive_ebooks           Float?
+  overdrive_audiobooks       Float?
+  storytel_ebooks            Float?
+  storytel_audiobooks        Float?
+  audible                    Float?   @db.Float
+  bonus_value                Float?   @db.Float
 }
 
 model sales_consolidation {

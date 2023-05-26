@@ -297,8 +297,12 @@ exports.getChannelBooks = getChannelBooks;
 const getTransactionStatusSummary = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
     const copyrightOwner = parseInt(req.body.copyrightOwner);
-    var d = new Date().setDate(0);
-    var prevMonthEnd = new Date(d);
+    const prevMonthData = await prisma.site_config.findFirst({
+        where: {
+            key: "prev_month_end",
+        },
+    });
+    const prevMonthEnd = new Date(prevMonthData === null || prevMonthData === void 0 ? void 0 : prevMonthData.value);
     let transactionData = {};
     transactionData["paid"] = {
         ebooks: 0,
@@ -322,7 +326,7 @@ const getTransactionStatusSummary = async (req, res) => {
                     equals: transactionDetails.status,
                 },
                 order_date: {
-                    lt: prevMonthEnd,
+                    lte: prevMonthEnd,
                 },
                 order_type: {
                     in: ["1", "2", "3"],

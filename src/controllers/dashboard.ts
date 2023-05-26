@@ -359,8 +359,14 @@ export const getTransactionStatusSummary = async (
   const authorId = parseInt(req.body.authorId);
   const copyrightOwner = parseInt(req.body.copyrightOwner);
 
-  var d = new Date().setDate(0);
-  var prevMonthEnd = new Date(d);
+  const prevMonthData = await prisma.site_config.findFirst({
+    where: {
+      key: "prev_month_end",
+    },
+  });
+  const prevMonthEnd = new Date(prevMonthData?.value!);
+  // var d = new Date().setDate(0);
+  // var prevMonthEnd = new Date(d);
 
   let transactionData: any = {};
   transactionData["paid"] = {
@@ -390,7 +396,7 @@ export const getTransactionStatusSummary = async (
           equals: transactionDetails.status,
         },
         order_date: {
-          lt: prevMonthEnd,
+          lte: prevMonthEnd,
         },
         order_type: {
           in: ["1", "2", "3"],
