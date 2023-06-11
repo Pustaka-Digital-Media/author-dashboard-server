@@ -75,9 +75,11 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
       };
     } else if (typeId === 4) {
       channelDataOrder = {
-        pustakaOnlineWhatsapp: null,
+        pustakaOnline: null,
+        pustakaWhatsapp: null,
         pustakaBookFair: null,
         amazon: null,
+        booksellers: null,
         total: null,
       };
     }
@@ -349,9 +351,11 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
     ];
   } else {
     result["names"] = [
-      "Pustaka (Online/Whatsapp)",
+      "Pustaka (Online)",
+      "Pustaka (Whatsapp)",
       "Pustaka (Book Fair)",
       "Amazon",
+      "Pustaka (Booksellers)",
       // "Flipkart",
       // "Ingram",
       "Total",
@@ -1169,59 +1173,56 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
   }
   // Paperback
   else {
-    // Pustaka Online/WhatsApp
+    // Pustaka Online
     {
-      const pustakaOnlineWhatsappEarnings =
-        await prisma.author_transaction.findMany({
-          select: {
-            book_final_royalty_value_inr: true,
-            converted_book_final_royalty_value_inr: true,
-            order_date: true,
-            order_type: true,
-            order_id: true,
-            comments: true,
-            pay_status: true,
-            book: {
-              select: {
-                book_id: true,
-                book_title: true,
-                language_tbl_relation: {
-                  select: {
-                    language_name: true,
-                  },
+      const pustakaOnlineEarnings = await prisma.author_transaction.findMany({
+        select: {
+          book_final_royalty_value_inr: true,
+          converted_book_final_royalty_value_inr: true,
+          order_date: true,
+          order_type: true,
+          order_id: true,
+          comments: true,
+          pay_status: true,
+          book: {
+            select: {
+              book_id: true,
+              book_title: true,
+              language_tbl_relation: {
+                select: {
+                  language_name: true,
                 },
               },
             },
           },
-          where: {
-            author_id: authorId,
-            copyright_owner: copyrightOwner,
-            order_date: {
-              gte: new Date(fyDates[0]),
-              lte: new Date(fyDates[1]),
-            },
-            order_type: {
-              in: ["7", "10"],
-            },
+        },
+        where: {
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          order_date: {
+            gte: new Date(fyDates[0]),
+            lte: new Date(fyDates[1]),
           },
-        });
+          order_type: {
+            in: ["7"],
+          },
+        },
+      });
 
-      channelData["pustakaOnlineWhatsapp"] = {};
-      channelData["pustakaOnlineWhatsapp"]["title"] =
-        "Pustaka - Online/WhatsApp";
-      channelData["pustakaOnlineWhatsapp"]["headers"] = [
+      channelData["pustakaOnline"] = {};
+      channelData["pustakaOnline"]["title"] = "Pustaka - Online";
+      channelData["pustakaOnline"]["headers"] = [
         "Order Date",
         "Title",
         "Quantity",
-        "Purchase Type",
         "Royalty",
         "Remarks",
         "Status",
       ];
-      channelData["pustakaOnlineWhatsapp"]["totalEarnings"] = 0;
-      channelData["pustakaOnlineWhatsapp"]["data"] = [];
+      channelData["pustakaOnline"]["totalEarnings"] = 0;
+      channelData["pustakaOnline"]["data"] = [];
 
-      for (const dataItem of pustakaOnlineWhatsappEarnings) {
+      for (const dataItem of pustakaOnlineEarnings) {
         const quantityData = await prisma.pod_order_details.findFirst({
           select: {
             quantity: true,
@@ -1239,7 +1240,6 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           ),
           title: dataItem.book.book_title,
           quantity: quantityData?.quantity,
-          purchaseType: dataItem.order_type,
           royalty: (
             dataItem.book_final_royalty_value_inr +
             dataItem.converted_book_final_royalty_value_inr
@@ -1248,8 +1248,90 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           status: dataItem.pay_status === "O" ? "Pending" : "Paid",
         };
 
-        channelData["pustakaOnlineWhatsapp"]["data"].push(insertItem);
-        channelData["pustakaOnlineWhatsapp"]["totalEarnings"] += parseInt(
+        channelData["pustakaOnline"]["data"].push(insertItem);
+        channelData["pustakaOnline"]["totalEarnings"] += parseInt(
+          insertItem.royalty
+        );
+      }
+    }
+
+    //Pustaka Whatsapp
+    {
+      const pustakaWhatsappEarnings = await prisma.author_transaction.findMany({
+        select: {
+          book_final_royalty_value_inr: true,
+          converted_book_final_royalty_value_inr: true,
+          order_date: true,
+          order_type: true,
+          order_id: true,
+          comments: true,
+          pay_status: true,
+          book: {
+            select: {
+              book_id: true,
+              book_title: true,
+              language_tbl_relation: {
+                select: {
+                  language_name: true,
+                },
+              },
+            },
+          },
+        },
+        where: {
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          order_date: {
+            gte: new Date(fyDates[0]),
+            lte: new Date(fyDates[1]),
+          },
+          order_type: {
+            in: ["10"],
+          },
+        },
+      });
+
+      channelData["pustakaWhatsapp"] = {};
+      channelData["pustakaWhatsapp"]["title"] = "Pustaka - WhatsApp";
+      channelData["pustakaWhatsapp"]["headers"] = [
+        "Order Date",
+        "Title",
+        "Quantity",
+        "Royalty",
+        "Remarks",
+        "Status",
+      ];
+      channelData["pustakaWhatsapp"]["totalEarnings"] = 0;
+      channelData["pustakaWhatsapp"]["data"] = [];
+
+      for (const dataItem of pustakaWhatsappEarnings) {
+        const quantityData = await prisma.pod_order_details.findFirst({
+          select: {
+            quantity: true,
+          },
+          where: {
+            order_id: dataItem.order_id,
+            book_id: dataItem.book.book_id,
+          },
+        });
+
+        const insertItem = {
+          orderDate: new Date(dataItem.order_date!).toLocaleDateString(
+            "en-US",
+            dateFormatConfig
+          ),
+          title: dataItem.book.book_title,
+          quantity: quantityData?.quantity,
+          royalty: (
+            dataItem.book_final_royalty_value_inr +
+            dataItem.converted_book_final_royalty_value_inr
+          ).toFixed(2),
+          remarks: dataItem.comments,
+          status: dataItem.pay_status === "O" ? "Pending" : "Paid",
+        };
+
+        channelData["pustakaWhatsapp"]["data"].push(insertItem);
+        channelData["pustakaWhatsapp"]["totalEarnings"] += parseInt(
           insertItem.royalty
         );
       }
@@ -1280,7 +1362,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
       });
 
       channelData["pustakaBookFair"] = {};
-      channelData["pustakaBookFair"]["title"] = "Pustaka - Online/WhatsApp";
+      channelData["pustakaBookFair"]["title"] = "Pustaka - Bookfair";
       channelData["pustakaBookFair"]["headers"] = [
         "Order Date",
         "Title",
@@ -1399,5 +1481,88 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
     }
   }
 
+  //Pustaka Booksellers
+  {
+    const pustakaBooksellersEarnings = await prisma.author_transaction.findMany(
+      {
+        select: {
+          book_final_royalty_value_inr: true,
+          converted_book_final_royalty_value_inr: true,
+          order_date: true,
+          order_type: true,
+          order_id: true,
+          comments: true,
+          pay_status: true,
+          book: {
+            select: {
+              book_id: true,
+              book_title: true,
+              language_tbl_relation: {
+                select: {
+                  language_name: true,
+                },
+              },
+            },
+          },
+        },
+        where: {
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          order_date: {
+            gte: new Date(fyDates[0]),
+            lte: new Date(fyDates[1]),
+          },
+          order_type: {
+            in: ["14"],
+          },
+        },
+      }
+    );
+
+    channelData["pustakaBooksellers"] = {};
+    channelData["pustakaBooksellers"]["title"] = "Pustaka - Booksellers";
+    channelData["pustakaBooksellers"]["headers"] = [
+      "Order Date",
+      "Title",
+      "Quantity",
+      "Royalty",
+      "Remarks",
+      "Status",
+    ];
+    channelData["pustakaBooksellers"]["totalEarnings"] = 0;
+    channelData["pustakaBooksellers"]["data"] = [];
+
+    for (const dataItem of pustakaBooksellersEarnings) {
+      const quantityData = await prisma.pod_order_details.findFirst({
+        select: {
+          quantity: true,
+        },
+        where: {
+          order_id: dataItem.order_id,
+          book_id: dataItem.book.book_id,
+        },
+      });
+
+      const insertItem = {
+        orderDate: new Date(dataItem.order_date!).toLocaleDateString(
+          "en-US",
+          dateFormatConfig
+        ),
+        title: dataItem.book.book_title,
+        quantity: quantityData?.quantity,
+        royalty: (
+          dataItem.book_final_royalty_value_inr +
+          dataItem.converted_book_final_royalty_value_inr
+        ).toFixed(2),
+        remarks: dataItem.comments,
+        status: dataItem.pay_status === "O" ? "Pending" : "Paid",
+      };
+
+      channelData["pustakaBooksellers"]["data"].push(insertItem);
+      channelData["pustakaBooksellers"]["totalEarnings"] += parseInt(
+        insertItem.royalty
+      );
+    }
+  }
   res.json(channelData);
 };

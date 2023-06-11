@@ -8,9 +8,19 @@ const getAuthorIds = async (copyrightOwner: string) => {
   const authorIds = await prisma.copyright_mapping.findMany({
     where: {
       copyright_owner: copyrightOwnerInt,
+      author: {
+        status: {
+          equals: "1",
+        },
+      },
     },
     select: {
       author_id: true,
+      author: {
+        select: {
+          status: true,
+        },
+      },
     },
   });
 

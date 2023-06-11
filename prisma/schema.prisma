@@ -198,42 +198,43 @@ model author_royalty_details {
 }
 
 model author_tbl {
-  author_id                 Int       @id @default(autoincrement())
-  author_name               String    @db.VarChar(100)
-  url_name                  String?   @db.VarChar(100)
+  author_id                 Int                 @id @default(autoincrement())
+  author_name               String              @db.VarChar(100)
+  url_name                  String?             @db.VarChar(100)
   author_type               Int?
-  author_image              String?   @db.VarChar(200)
-  copy_right_owner_name     String    @db.VarChar(100)
-  relationship              String    @db.VarChar(40)
-  mobile                    String?   @db.VarChar(15)
-  phone                     String?   @db.VarChar(15)
-  email                     String?   @db.VarChar(40)
-  address                   String?   @db.Text
-  fb_url                    String?   @db.VarChar(2048)
-  twitter_url               String?   @db.VarChar(2048)
-  blog_url                  String?   @db.VarChar(2048)
-  description               String?   @db.Text
-  status                    Int       @default(dbgenerated("0"))
-  created_at                DateTime  @default(now()) @db.Timestamp(0)
-  activated_at              DateTime? @db.Timestamp(0)
+  author_image              String?             @db.VarChar(200)
+  copy_right_owner_name     String              @db.VarChar(100)
+  relationship              String              @db.VarChar(40)
+  mobile                    String?             @db.VarChar(15)
+  phone                     String?             @db.VarChar(15)
+  email                     String?             @db.VarChar(40)
+  address                   String?             @db.Text
+  fb_url                    String?             @db.VarChar(2048)
+  twitter_url               String?             @db.VarChar(2048)
+  blog_url                  String?             @db.VarChar(2048)
+  description               String?             @db.Text
+  status                    String              @default(dbgenerated("0"))
+  created_at                DateTime            @default(now()) @db.Timestamp(0)
+  activated_at              DateTime?           @db.Timestamp(0)
   created_by                Int
-  gender                    String    @db.Char(1)
+  gender                    String              @db.Char(1)
   copyright_owner           Int?
   user_id                   Int
   narrator_id               Int?
-  amazon_link               String?   @db.VarChar(200)
-  pratilipi_link            String?   @db.VarChar(200)
-  audible_link              String?   @db.VarChar(200)
-  odilo_link                String?   @db.VarChar(200)
-  scribd_link               String?   @db.VarChar(200)
-  googlebooks_link          String?   @db.VarChar(200)
-  storytel_link             String?   @db.VarChar(200)
-  overdrive_link            String?   @db.VarChar(200)
-  pinterest_link            String?   @db.VarChar(200)
-  agreement_details         String?   @db.Text
+  amazon_link               String?             @db.VarChar(200)
+  pratilipi_link            String?             @db.VarChar(200)
+  audible_link              String?             @db.VarChar(200)
+  odilo_link                String?             @db.VarChar(200)
+  scribd_link               String?             @db.VarChar(200)
+  googlebooks_link          String?             @db.VarChar(200)
+  storytel_link             String?             @db.VarChar(200)
+  overdrive_link            String?             @db.VarChar(200)
+  pinterest_link            String?             @db.VarChar(200)
+  agreement_details         String?             @db.Text
   agreement_ebook_count     Int?
   agreement_audiobook_count Int?
   agreement_paperback_count Int?
+  copyright_mapping         copyright_mapping[]
 }
 
 model author_transaction {
@@ -418,10 +419,11 @@ model contact_us {
 }
 
 model copyright_mapping {
-  id              Int       @id @default(autoincrement())
+  id              Int         @id @default(autoincrement())
   copyright_owner Int?
+  author          author_tbl? @relation(fields: [author_id], references: [author_id])
   author_id       Int?
-  date_created    DateTime? @db.DateTime(0)
+  date_created    DateTime?   @db.DateTime(0)
 }
 
 model episode_book_details {
@@ -961,31 +963,33 @@ model razorpay_requests {
 }
 
 model royalty_settlement {
-  id                         Int      @id @default(autoincrement())
-  copy_right_owner_id        Int
-  author_id                  Int?
-  settlement_date            DateTime @db.Date
-  settlement_amount          Float
-  tds_amount                 Float?
-  payment_type               String   @db.VarChar(20)
-  bank_transaction_details   String   @db.LongText
-  comments                   String   @db.LongText
-  pustaka_ebooks             Float?
-  pustaka_audiobooks         Float?
-  pustaka_online_paperback   Float?
-  pustaka_whatsapp_paperback Float?
-  pustaka_bookfair_paperback Float?
-  amazon                     Float?
-  kobo                       Float?
-  scribd                     Float?
-  google_ebooks              Float?
-  google_audiobooks          Float?
-  overdrive_ebooks           Float?
-  overdrive_audiobooks       Float?
-  storytel_ebooks            Float?
-  storytel_audiobooks        Float?
-  audible                    Float?   @db.Float
-  bonus_value                Float?   @db.Float
+  id                            Int      @id @default(autoincrement())
+  copy_right_owner_id           Int
+  author_id                     Int?
+  settlement_date               DateTime @db.Date
+  settlement_amount             Float
+  tds_amount                    Float?
+  payment_type                  String   @db.VarChar(20)
+  bank_transaction_details      String   @db.LongText
+  comments                      String   @db.LongText
+  pustaka_ebooks                Float?
+  pustaka_audiobooks            Float?
+  pustaka_online_paperback      Float?
+  pustaka_whatsapp_paperback    Float?
+  pustaka_bookfair_paperback    Float?
+  pustaka_amazon_paperback      Float?
+  pustaka_booksellers_paperback Float?
+  amazon                        Float?
+  kobo                          Float?
+  scribd                        Float?
+  google_ebooks                 Float?
+  google_audiobooks             Float?
+  overdrive_ebooks              Float?
+  overdrive_audiobooks          Float?
+  storytel_ebooks               Float?
+  storytel_audiobooks           Float?
+  audible                       Float?   @db.Float
+  bonus_value                   Float?   @db.Float
 }
 
 model sales_consolidation {
