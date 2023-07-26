@@ -569,7 +569,29 @@ export const getTransactionStatusSummary = async (
       transactionData[transactionDetails.name][bookType.name] +=
         amountData._sum.final_royalty_value;
     }
+
+    // Pratilipi
+    // Amount Paid/Pending
+    for (let i = 0; i < TRANSACTION_STATUS.length; i++) {
+      const transactionDetails = TRANSACTION_STATUS[i];
+      const amountData = await prisma.pratilipi_transactions.aggregate({
+        _sum: {
+          final_royalty_value: true,
+        },
+        where: {
+          status: {
+            equals: transactionDetails.status,
+          },
+          type_of_book: bookType.id,
+          copyright_owner: copyrightOwner,
+          author_id: authorId,
+        },
+      });
+      transactionData[transactionDetails.name][bookType.name] +=
+        amountData._sum.final_royalty_value;
+    }
   }
+
   const bonusData = await prisma.publisher_tbl.findFirst({
     where: {
       copyright_owner: copyrightOwner.toString(),

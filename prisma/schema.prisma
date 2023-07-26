@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://pustakaprodv2:ebooks%23Pustaka@pustaka-prod-db-v2.cokqzfziewag.ap-south-1.rds.amazonaws.com:3306/pustaka_prod_v4"
+  url      = "mysql://root:root@localhost:8889/pustaka_v4"
 }
 
 model amazon_books {
@@ -1117,6 +1117,21 @@ model storytel_transactions {
   transaction_date            DateTime? @db.Date
   type_of_book                Int
   status                      String?   @db.VarChar(1)
+}
+
+model pratilipi_transactions {
+  id                  Int       @id @default(autoincrement())
+  user_id             String?   @db.VarChar(25)
+  earning             Int?
+  currency            String?   @db.VarChar(5)
+  author_name         String?   @db.VarChar(150)
+  author_id           Int?
+  language_id         Int?
+  copyright_owner     Int?
+  final_royalty_value Float?    @db.Float
+  transaction_date    DateTime? @db.Date
+  type_of_book        Int
+  status              String?   @db.VarChar(1)
 }
 
 model subscribe_newsletter {

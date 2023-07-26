@@ -473,6 +473,24 @@ const getTransactionStatusSummary = async (req, res) => {
             transactionData[transactionDetails.name][bookType.name] +=
                 amountData._sum.final_royalty_value;
         }
+        for (let i = 0; i < globals_1.TRANSACTION_STATUS.length; i++) {
+            const transactionDetails = globals_1.TRANSACTION_STATUS[i];
+            const amountData = await prisma.pratilipi_transactions.aggregate({
+                _sum: {
+                    final_royalty_value: true,
+                },
+                where: {
+                    status: {
+                        equals: transactionDetails.status,
+                    },
+                    type_of_book: bookType.id,
+                    copyright_owner: copyrightOwner,
+                    author_id: authorId,
+                },
+            });
+            transactionData[transactionDetails.name][bookType.name] +=
+                amountData._sum.final_royalty_value;
+        }
     }
     const bonusData = await prisma.publisher_tbl.findFirst({
         where: {
