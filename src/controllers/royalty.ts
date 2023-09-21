@@ -13,7 +13,6 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
   const copyrightOwner = parseInt(req.body.copyrightOwner);
   const typeId = parseInt(req.body.typeId);
   const type = req.body.type;
-
   const result: any = {};
   const royaltySummary: any = {};
 
@@ -62,6 +61,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
         storytel: null,
         overdrive: null,
         kobo: null,
+        pratilipi: null,
         total: null,
       };
     } else if (typeId === 3) {
@@ -79,6 +79,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
         pustakaWhatsapp: null,
         pustakaBookFair: null,
         amazon: null,
+        flipkart: null,
         booksellers: null,
         total: null,
       };
@@ -193,6 +194,24 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
 
           channelData["kobo"] = koboEarnings._sum.paid_inr;
           channelData["total"] += koboEarnings._sum.paid_inr;
+
+          const pratilipiEarnings =
+            await prisma.pratilipi_transactions.aggregate({
+              _sum: {
+                final_royalty_value: true,
+              },
+              where: {
+                author_id: authorId,
+                copyright_owner: copyrightOwner,
+                transaction_date: {
+                  gte: startDate,
+                  lte: endDate,
+                },
+              },
+            });
+
+          channelData["pratilipi"] = pratilipiEarnings._sum.final_royalty_value;
+          channelData["total"] += pratilipiEarnings._sum.final_royalty_value;
         }
       }
 
@@ -338,6 +357,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
       "Storytel",
       "Overdrive",
       "Kobo",
+      "Pratilipi",
       "Total",
     ];
   } else if (typeId === 3) {
@@ -355,9 +375,8 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
       "Pustaka (Whatsapp)",
       "Pustaka (Book Fair)",
       "Amazon",
+      "Flipkart",
       "Pustaka (Booksellers)",
-      // "Flipkart",
-      // "Ingram",
       "Total",
     ];
   }
@@ -379,7 +398,6 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
 
   const summaryData: any = {};
   const result: any = {};
-
   let dates: any = [];
   if (type === "year") {
     dates = await prisma.site_config.findMany({
@@ -392,6 +410,7 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
   } else {
     const fyYearKey = req.body.fyYearKey;
     dates = await getMonthsForFy(fyYearKey);
+    console.log(dates);
   }
 
   for (let i = 0; i < dates.length; i++) {
@@ -565,6 +584,28 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
 
           channelData[bookType.name] += koboEarnings._sum.paid_inr;
           channelData["total"] += koboEarnings._sum.paid_inr;
+        }
+
+        // Pratilipi
+        {
+          const pratilipiEarnings =
+            await prisma.pratilipi_transactions.aggregate({
+              _sum: {
+                final_royalty_value: true,
+              },
+              where: {
+                author_id: authorId,
+                copyright_owner: copyrightOwner,
+                transaction_date: {
+                  gte: startDate,
+                  lte: endDate,
+                },
+              },
+            });
+
+          channelData[bookType.name] +=
+            pratilipiEarnings._sum.final_royalty_value;
+          channelData["total"] += pratilipiEarnings._sum.final_royalty_value;
         }
       }
       // Only Audiobook Channels
@@ -760,6 +801,9 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
         where: {
           author_id: authorId,
           copyright_owner: copyrightOwner,
+          final_royalty_value: {
+            gt: 0,
+          },
           invoice_date: {
             gte: new Date(fyDates[0]),
             lte: new Date(fyDates[1]),
@@ -1477,6 +1521,75 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
 
         channelData["amazon"]["data"].push(insertItem);
         channelData["amazon"]["totalEarnings"] += parseInt(insertItem.royalty);
+      }
+    }
+    // Flipkart
+    {
+      const flipkartEarnings = await prisma.author_transaction.findMany({
+        select: {
+          book_final_royalty_value_inr: true,
+          converted_book_final_royalty_value_inr: true,
+          order_date: true,
+          order_type: true,
+          order_id: true,
+          comments: true,
+          pay_status: true,
+          book: {
+            select: {
+              book_id: true,
+              book_title: true,
+              language_tbl_relation: {
+                select: {
+                  language_name: true,
+                },
+              },
+            },
+          },
+        },
+        where: {
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          order_date: {
+            gte: new Date(fyDates[0]),
+            lte: new Date(fyDates[1]),
+          },
+          order_type: {
+            in: ["12"],
+          },
+        },
+      });
+
+      channelData["flipkart"] = {};
+      channelData["flipkart"]["title"] = "Flipkart";
+      channelData["flipkart"]["headers"] = [
+        "Order Date",
+        "Title",
+        "Royalty",
+        "Remarks",
+        "Status",
+      ];
+      channelData["flipkart"]["totalEarnings"] = 0;
+      channelData["flipkart"]["data"] = [];
+
+      for (const dataItem of flipkartEarnings) {
+        const insertItem = {
+          orderDate: new Date(dataItem.order_date!).toLocaleDateString(
+            "en-US",
+            dateFormatConfig
+          ),
+          title: dataItem.book.book_title,
+          royalty: (
+            dataItem.book_final_royalty_value_inr +
+            dataItem.converted_book_final_royalty_value_inr
+          ).toFixed(2),
+          remarks: dataItem.comments,
+          status: dataItem.pay_status === "O" ? "Pending" : "Paid",
+        };
+
+        channelData["flipkart"]["data"].push(insertItem);
+        channelData["flipkart"]["totalEarnings"] += parseInt(
+          insertItem.royalty
+        );
       }
     }
   }

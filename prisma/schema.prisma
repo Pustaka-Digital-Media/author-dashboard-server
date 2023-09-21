@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "mysql"
   url      = "mysql://pustakaprodv2:ebooks%23Pustaka@pustaka-prod-db-v2.cokqzfziewag.ap-south-1.rds.amazonaws.com:3306/pustaka_prod_v4"

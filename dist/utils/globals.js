@@ -15,6 +15,7 @@ exports.PAPERBACK_BOOK_TYPES = [
     { id: ["10"], name: "pustakaWhatsapp" },
     { id: ["9"], name: "pustakaBookFair" },
     { id: ["11"], name: "amazon" },
+    { id: ["12"], name: "flipkart" },
     { id: ["14"], name: "booksellers" },
 ];
 exports.TRANSACTION_STATUS = [
