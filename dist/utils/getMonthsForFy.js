@@ -24,6 +24,11 @@ const getMonthsForFy = async (fyYearKey) => {
             key: fyYearKey,
         },
     });
+    const prevMonthDate = await prisma.site_config.findFirst({
+        where: {
+            category: "prevmonth",
+        },
+    });
     const fyYearFull = fyYear === null || fyYear === void 0 ? void 0 : fyYear.value.split(",");
     const fyYears = [];
     if (fyYearFull) {
@@ -55,7 +60,9 @@ const getMonthsForFy = async (fyYearKey) => {
                 year: "numeric",
             });
         }
-        result.push(dates);
+        if (new Date(new Date(dates.value.split(",")[1])) <=
+            new Date(prevMonthDate.value))
+            result.push(dates);
     }
     return result;
 };
