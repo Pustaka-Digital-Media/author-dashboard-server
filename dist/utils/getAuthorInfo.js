@@ -26,7 +26,6 @@ const getAuthorChannelLinks = async (authorId) => {
         select: {
             url_name: true,
             amazon_link: true,
-            odilo_link: true,
             scribd_link: true,
             audible_link: true,
             storytel_link: true,

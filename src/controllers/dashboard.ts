@@ -175,12 +175,6 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     booksData["ebooks"]["pratilipi"]["image_url"] =
       S3_URL + "/pratilipi-icon.png";
     booksData["ebooks"]["pratilipi"]["url"] = channelLinks?.pratilipi_link;
-
-    booksData["ebooks"]["odilo"] = {};
-    booksData["ebooks"]["odilo"]["name"] = "Odilo";
-    booksData["ebooks"]["odilo"]["count"] = 0;
-    booksData["ebooks"]["odilo"]["image_url"] = S3_URL + "/odilo-icon.svg";
-    booksData["ebooks"]["odilo"]["url"] = channelLinks?.odilo_link;
   }
 
   if (includeTypes.includes(3)) {
@@ -359,6 +353,7 @@ export const getTransactionStatusSummary = async (
   const authorId = parseInt(req.body.authorId);
   const copyrightOwner = parseInt(req.body.copyrightOwner);
   let transactionData: any = {};
+
   const prevMonthData = await prisma.site_config.findFirst({
     where: {
       key: "prev_month_end",
@@ -368,6 +363,14 @@ export const getTransactionStatusSummary = async (
   // var d = new Date().setDate(0);
   // var prevMonthEnd = new Date(d);
   transactionData["prevMonthEnd"] = prevMonthEnd;
+
+  const nextPaymentData = await prisma.site_config.findFirst({
+    where: {
+      key: "next_payment_date",
+    },
+  });
+  const nextPaymentDate = new Date(nextPaymentData?.value!);
+  transactionData["nextPaymentDate"] = nextPaymentDate;
 
   transactionData["paid"] = {
     ebooks: 0,

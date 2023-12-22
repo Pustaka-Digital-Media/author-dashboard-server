@@ -146,11 +146,6 @@ const getChannelBooks = async (req, res) => {
         booksData["ebooks"]["pratilipi"]["image_url"] =
             globals_1.S3_URL + "/pratilipi-icon.png";
         booksData["ebooks"]["pratilipi"]["url"] = channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.pratilipi_link;
-        booksData["ebooks"]["odilo"] = {};
-        booksData["ebooks"]["odilo"]["name"] = "Odilo";
-        booksData["ebooks"]["odilo"]["count"] = 0;
-        booksData["ebooks"]["odilo"]["image_url"] = globals_1.S3_URL + "/odilo-icon.svg";
-        booksData["ebooks"]["odilo"]["url"] = channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.odilo_link;
     }
     if (includeTypes.includes(3)) {
         const pustakaAudiobooksCount = await prisma.book_tbl.count({
@@ -305,6 +300,13 @@ const getTransactionStatusSummary = async (req, res) => {
     });
     const prevMonthEnd = new Date(prevMonthData === null || prevMonthData === void 0 ? void 0 : prevMonthData.value);
     transactionData["prevMonthEnd"] = prevMonthEnd;
+    const nextPaymentData = await prisma.site_config.findFirst({
+        where: {
+            key: "next_payment_date",
+        },
+    });
+    const nextPaymentDate = new Date(nextPaymentData === null || nextPaymentData === void 0 ? void 0 : nextPaymentData.value);
+    transactionData["nextPaymentDate"] = nextPaymentDate;
     transactionData["paid"] = {
         ebooks: 0,
         audiobooks: 0,
