@@ -1679,3 +1679,122 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
   }
   res.json(channelData);
 };
+
+export const preparePaperbackStockPagination = async (
+  req: Request,
+  res: Response
+) => {
+  const result: any = {};
+
+  const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
+  const limit = parseInt(req.body.limit);
+
+  const stockCount = await prisma.paperback_stock.groupBy({
+    by: ["book_id"],
+    _count: {
+      book_id: true,
+    },
+    where: {
+      book: {
+        author_name: authorId,
+        copyright_owner: copyrightOwner,
+      },
+    },
+  });
+
+  result.totalPages = Math.floor(stockCount.length / limit) || 1;
+  result.totalBooks = stockCount.length;
+
+  res.json(result);
+};
+
+export const getPaginatedPaperbackStock = async (
+  req: Request,
+  res: Response
+) => {
+  const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
+  const currentPage = parseInt(req.body.currentPage);
+  const limit = parseInt(req.body.limit);
+
+  const result: any = [];
+
+  const bookIds = await prisma.paperback_stock.groupBy({
+    skip: currentPage === 1 ? 0 : currentPage * limit,
+    take: limit,
+    by: ["book_id"],
+    where: {
+      book: {
+        author_name: authorId,
+        copyright_owner: copyrightOwner,
+        status: true,
+      },
+    },
+    orderBy: {
+      book_id: "desc",
+    },
+  });
+
+  for (let i = 0; i < bookIds.length; i++) {
+    let bookId = bookIds[i].book_id;
+
+    const book = await prisma.book_tbl.findUnique({
+      where: {
+        book_id: bookId,
+      },
+      select: {
+        book_id: true,
+        book_title: true,
+        url_name: true,
+        number_of_page: true,
+        type_of_book: true,
+        paper_back_flag: true,
+        genre: {
+          select: {
+            genre_name: true,
+          },
+        },
+        language_tbl_relation: {
+          select: {
+            language_name: true,
+          },
+        },
+      },
+    });
+    const bookStock = await prisma.paperback_stock.findFirst({
+      where: {
+        book_id: book?.book_id,
+      },
+      select: {
+        stock_in_hand: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    const bookMain = { ...book, stockInHand: bookStock?.stock_in_hand };
+    result.push(bookMain);
+  }
+
+  res.json(result);
+};
+
+export const getPaperbackStockDetails = async (req: Request, res: Response) => {
+  const bookId = parseInt(req.body.bookId);
+
+  const stockDetails = await prisma.paperback_stock.findMany({
+    where: {
+      book_id: bookId,
+    },
+    select: {
+      last_update_date: true,
+      bookfair: true,
+      quantity: true,
+      stock_in_hand: true,
+    },
+  });
+
+  res.json(stockDetails);
+};

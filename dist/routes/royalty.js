@@ -9,5 +9,8 @@ const router = express_1.default.Router();
 router.post("/getRoyaltySummaryData", royalty_1.getRoyaltySummaryData);
 router.post("/getAllChannelSummaryData", royalty_1.getAllChannelSummaryData);
 router.post("/getPaymentsForMonth", royalty_1.getPaymentsForMonth);
+router.post("/preparePaperbackStockPagination", royalty_1.preparePaperbackStockPagination);
+router.post("/getPaginatedPaperbackStock", royalty_1.getPaginatedPaperbackStock);
+router.post("/getPaperbackStockDetails", royalty_1.getPaperbackStockDetails);
 exports.default = router;
 //# sourceMappingURL=royalty.js.map

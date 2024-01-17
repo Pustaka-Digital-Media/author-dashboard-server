@@ -334,6 +334,7 @@ model book_tbl {
   pratilipi_books        pratilipi_books?
   amazon_paperback_books amazon_paperback_books?
   pod_bookfair           pod_bookfair?
+  paperback_stock        paperback_stock[]
 }
 
 model book_types {
@@ -796,6 +797,16 @@ model overdrive_transactions {
   copyright_owner     Int?
   type_of_book        Int
   status              String   @db.VarChar(10)
+}
+
+model paperback_stock {
+  id               Int      @id @default(autoincrement())
+  quantity         Int
+  bookfair         Int
+  stock_in_hand    Int
+  last_update_date DateTime @db.Date
+  book_id          Int
+  book             book_tbl @relation(fields: [book_id], references: [book_id])
 }
 
 model payout_session {
