@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPaperbackStockDetails = exports.getPaginatedPaperbackStock = exports.preparePaperbackStockPagination = exports.getPaymentsForMonth = exports.getAllChannelSummaryData = exports.getRoyaltySummaryData = void 0;
+exports.getPaperbackStockDetails = exports.getPaginatedPaperbackStock = exports.preparePaperbackStockPagination = exports.getPaymentsForMonth = exports.getAllChannelSummaryData = exports.getPreviousPaperbackRoyaltySummaryData = exports.getRoyaltySummaryData = void 0;
 const client_1 = require("@prisma/client");
 const globals_1 = require("../utils/globals");
 const getMonthsForFy_1 = __importStar(require("../utils/getMonthsForFy"));
@@ -63,7 +63,9 @@ const getRoyaltySummaryData = async (req, res) => {
         const endDateOld = new Date(fyDates[1]);
         const endDate = new Date(endDateOld.getTime() + Math.abs(endDateOld.getTimezoneOffset() * 60000));
         const channelData = {};
-        channelData["total"] = 0;
+        if (typeId !== 4) {
+            channelData["total"] = 0;
+        }
         let channelDataOrder = {};
         if (typeId === 1) {
             channelDataOrder = {
@@ -90,13 +92,7 @@ const getRoyaltySummaryData = async (req, res) => {
         }
         else if (typeId === 4) {
             channelDataOrder = {
-                pustakaOnline: null,
-                pustakaWhatsapp: null,
-                pustakaBookFair: null,
-                amazon: null,
-                flipkart: null,
-                booksellers: null,
-                total: null,
+                consolidated: null,
             };
         }
         if (typeId !== 4) {
@@ -279,37 +275,31 @@ const getRoyaltySummaryData = async (req, res) => {
             }
         }
         else {
-            for (let k = 0; k < globals_1.PAPERBACK_BOOK_TYPES.length; k++) {
-                const bookTypeData = globals_1.PAPERBACK_BOOK_TYPES[k];
-                const paperbackEarnings = await prisma.author_transaction.aggregate({
-                    _sum: {
-                        book_final_royalty_value_inr: true,
-                        converted_book_final_royalty_value_inr: true,
+            const paperbackEarnings = await prisma.author_transaction.aggregate({
+                _sum: {
+                    book_final_royalty_value_inr: true,
+                    converted_book_final_royalty_value_inr: true,
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    order_date: {
+                        gte: startDate,
+                        lte: endDate,
                     },
-                    where: {
-                        author_id: authorId,
-                        copyright_owner: copyrightOwner,
-                        order_date: {
-                            gte: startDate,
-                            lte: endDate,
-                        },
-                        order_type: {
-                            in: bookTypeData.id,
-                        },
+                    order_type: {
+                        equals: "15",
                     },
-                });
-                channelData[bookTypeData.name] =
-                    (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
-                        (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
-                channelData["total"] +=
-                    (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
-                        (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
-                if (type === "year" && i >= 8) {
-                    royaltySummary[fyData.key] = Object.assign(channelDataOrder, channelData);
-                }
-                else if (type === "month") {
-                    royaltySummary[fyData.key] = Object.assign(channelDataOrder, channelData);
-                }
+                },
+            });
+            channelData["consolidated"] =
+                (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
+                    (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
+            if (type === "year" && i >= 9) {
+                royaltySummary[fyData.key] = Object.assign(channelDataOrder, channelData);
+            }
+            else if (type === "month") {
+                royaltySummary[fyData.key] = Object.assign(channelDataOrder, channelData);
             }
         }
     }
@@ -338,15 +328,7 @@ const getRoyaltySummaryData = async (req, res) => {
         ];
     }
     else {
-        result["names"] = [
-            "Pustaka (Online)",
-            "Pustaka (Whatsapp)",
-            "Pustaka (Book Fair)",
-            "Amazon",
-            "Flipkart",
-            "Pustaka (Booksellers)",
-            "Total",
-        ];
+        result["names"] = ["Consolidated Earnings"];
     }
     let totalEarnings = 0;
     for (const fyYear in royaltySummary) {
@@ -356,6 +338,102 @@ const getRoyaltySummaryData = async (req, res) => {
     res.json(result);
 };
 exports.getRoyaltySummaryData = getRoyaltySummaryData;
+const getPreviousPaperbackRoyaltySummaryData = async (req, res) => {
+    const authorId = parseInt(req.body.authorId);
+    const copyrightOwner = parseInt(req.body.copyrightOwner);
+    const typeId = parseInt(req.body.typeId);
+    const type = req.body.type;
+    const result = {};
+    const royaltySummary = {};
+    let dates = {};
+    if (type === "year") {
+        dates = await prisma.site_config.findMany({
+            where: {
+                category: {
+                    equals: "FY",
+                },
+            },
+        });
+    }
+    else {
+        const fyYearKey = req.body.fyYearKey;
+        dates = await (0, getMonthsForFy_1.default)(fyYearKey);
+    }
+    let bookType = {};
+    if (typeId === 1) {
+        bookType = globals_1.BOOK_TYPES[0];
+    }
+    else {
+        bookType = globals_1.BOOK_TYPES[1];
+    }
+    for (let i = 0; i < dates.length; i++) {
+        const fyData = dates[i];
+        const fyDates = fyData.value.split(",");
+        const startDate = new Date(fyDates[0]);
+        const endDateOld = new Date(fyDates[1]);
+        const endDate = new Date(endDateOld.getTime() + Math.abs(endDateOld.getTimezoneOffset() * 60000));
+        const channelData = {};
+        channelData["total"] = 0;
+        let channelDataOrder = {
+            pustakaOnline: null,
+            pustakaWhatsapp: null,
+            pustakaBookFair: null,
+            amazon: null,
+            flipkart: null,
+            booksellers: null,
+            total: null,
+        };
+        for (let k = 0; k < globals_1.PAPERBACK_BOOK_TYPES.length; k++) {
+            const bookTypeData = globals_1.PAPERBACK_BOOK_TYPES[k];
+            const paperbackEarnings = await prisma.author_transaction.aggregate({
+                _sum: {
+                    book_final_royalty_value_inr: true,
+                    converted_book_final_royalty_value_inr: true,
+                },
+                where: {
+                    author_id: authorId,
+                    copyright_owner: copyrightOwner,
+                    order_date: {
+                        gte: startDate,
+                        lte: endDate,
+                    },
+                    order_type: {
+                        in: bookTypeData.id,
+                    },
+                },
+            });
+            channelData[bookTypeData.name] =
+                (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
+                    (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
+            channelData["total"] +=
+                (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
+                    (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
+            if (type === "year" && i >= 8) {
+                royaltySummary[fyData.key] = Object.assign(channelDataOrder, channelData);
+            }
+            else if (type === "month") {
+                royaltySummary[fyData.key] = Object.assign(channelDataOrder, channelData);
+            }
+        }
+    }
+    result["data"] = royaltySummary;
+    result["names"] = [
+        "Pustaka (Online)",
+        "Pustaka (Whatsapp)",
+        "Pustaka (Book Fair)",
+        "Amazon",
+        "Flipkart",
+        "Pustaka (Booksellers)",
+        "Total",
+    ];
+    let totalEarnings = 0;
+    for (const fyYear in royaltySummary) {
+        totalEarnings += royaltySummary[fyYear]["total"];
+    }
+    result["totalEarnings"] = totalEarnings;
+    res.json(result);
+};
+exports.getPreviousPaperbackRoyaltySummaryData = getPreviousPaperbackRoyaltySummaryData;
 const getAllChannelSummaryData = async (req, res) => {
     const authorId = req.body.authorId;
     const copyrightOwner = req.body.copyrightOwner;
@@ -375,7 +453,6 @@ const getAllChannelSummaryData = async (req, res) => {
     else {
         const fyYearKey = req.body.fyYearKey;
         dates = await (0, getMonthsForFy_1.default)(fyYearKey);
-        console.log(dates);
     }
     for (let i = 0; i < dates.length; i++) {
         const channelData = {};
@@ -1463,20 +1540,17 @@ const preparePaperbackStockPagination = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
     const copyrightOwner = parseInt(req.body.copyrightOwner);
     const limit = parseInt(req.body.limit);
-    const stockCount = await prisma.paperback_stock.groupBy({
-        by: ["book_id"],
-        _count: {
-            book_id: true,
-        },
+    const booksCount = await prisma.book_tbl.count({
         where: {
-            book: {
-                author_name: authorId,
-                copyright_owner: copyrightOwner,
-            },
+            author_name: authorId,
+            copyright_owner: copyrightOwner,
+            paper_back_flag: 1,
+            paper_back_readiness_flag: 1,
+            status: true,
         },
     });
-    result.totalPages = Math.floor(stockCount.length / limit) || 1;
-    result.totalBooks = stockCount.length;
+    result.totalPages = Math.floor(booksCount / limit) || 1;
+    result.totalBooks = booksCount;
     res.json(result);
 };
 exports.preparePaperbackStockPagination = preparePaperbackStockPagination;
@@ -1486,16 +1560,18 @@ const getPaginatedPaperbackStock = async (req, res) => {
     const currentPage = parseInt(req.body.currentPage);
     const limit = parseInt(req.body.limit);
     const result = [];
-    const bookIds = await prisma.paperback_stock.groupBy({
+    const bookIds = await prisma.book_tbl.findMany({
         skip: currentPage === 1 ? 0 : currentPage * limit,
         take: limit,
-        by: ["book_id"],
+        select: {
+            book_id: true,
+        },
         where: {
-            book: {
-                author_name: authorId,
-                copyright_owner: copyrightOwner,
-                status: true,
-            },
+            author_name: authorId,
+            copyright_owner: copyrightOwner,
+            paper_back_flag: 1,
+            paper_back_readiness_flag: 1,
+            status: true,
         },
         orderBy: {
             book_id: "desc",
@@ -1545,15 +1621,12 @@ const getPaginatedPaperbackStock = async (req, res) => {
 exports.getPaginatedPaperbackStock = getPaginatedPaperbackStock;
 const getPaperbackStockDetails = async (req, res) => {
     const bookId = parseInt(req.body.bookId);
-    const stockDetails = await prisma.paperback_stock.findMany({
+    const stockDetails = await prisma.pustaka_paperback_stock_ledger.findMany({
         where: {
             book_id: bookId,
         },
-        select: {
-            last_update_date: true,
-            bookfair: true,
-            quantity: true,
-            stock_in_hand: true,
+        orderBy: {
+            transaction_date: "desc",
         },
     });
     res.json(stockDetails);

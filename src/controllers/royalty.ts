@@ -49,7 +49,9 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
     );
 
     const channelData: any = {};
-    channelData["total"] = 0;
+    if (typeId !== 4) {
+      channelData["total"] = 0;
+    }
 
     let channelDataOrder: any = {};
     if (typeId === 1) {
@@ -75,13 +77,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
       };
     } else if (typeId === 4) {
       channelDataOrder = {
-        pustakaOnline: null,
-        pustakaWhatsapp: null,
-        pustakaBookFair: null,
-        amazon: null,
-        flipkart: null,
-        booksellers: null,
-        total: null,
+        consolidated: null,
       };
     }
 
@@ -302,47 +298,40 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
     }
     // Paperback
     else {
-      for (let k = 0; k < PAPERBACK_BOOK_TYPES.length; k++) {
-        const bookTypeData = PAPERBACK_BOOK_TYPES[k];
-
-        // All
-        const paperbackEarnings = await prisma.author_transaction.aggregate({
-          _sum: {
-            book_final_royalty_value_inr: true,
-            converted_book_final_royalty_value_inr: true,
+      // All
+      const paperbackEarnings = await prisma.author_transaction.aggregate({
+        _sum: {
+          book_final_royalty_value_inr: true,
+          converted_book_final_royalty_value_inr: true,
+        },
+        where: {
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          order_date: {
+            gte: startDate,
+            lte: endDate,
           },
-          where: {
-            author_id: authorId,
-            copyright_owner: copyrightOwner,
-            order_date: {
-              gte: startDate,
-              lte: endDate,
-            },
-            order_type: {
-              in: bookTypeData.id,
-            },
+          order_type: {
+            equals: "15",
           },
-        });
+        },
+      });
 
-        channelData[bookTypeData.name] =
-          (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
-          (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
-        channelData["total"] +=
-          (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
-          (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
+      channelData["consolidated"] =
+        (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
+        (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
 
-        // Calculating Paperback Data only after "FY 2022-23"
-        if (type === "year" && i >= 8) {
-          royaltySummary[fyData.key] = Object.assign(
-            channelDataOrder,
-            channelData
-          );
-        } else if (type === "month") {
-          royaltySummary[fyData.key] = Object.assign(
-            channelDataOrder,
-            channelData
-          );
-        }
+      // Calculating Paperback Data only after "FY 2023-24"
+      if (type === "year" && i >= 9) {
+        royaltySummary[fyData.key] = Object.assign(
+          channelDataOrder,
+          channelData
+        );
+      } else if (type === "month") {
+        royaltySummary[fyData.key] = Object.assign(
+          channelDataOrder,
+          channelData
+        );
       }
     }
   }
@@ -370,16 +359,129 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
       "Total",
     ];
   } else {
-    result["names"] = [
-      "Pustaka (Online)",
-      "Pustaka (Whatsapp)",
-      "Pustaka (Book Fair)",
-      "Amazon",
-      "Flipkart",
-      "Pustaka (Booksellers)",
-      "Total",
-    ];
+    result["names"] = ["Consolidated Earnings"];
   }
+
+  // Calculating total earnings
+  let totalEarnings = 0;
+  for (const fyYear in royaltySummary) {
+    totalEarnings += royaltySummary[fyYear]["total"];
+  }
+  result["totalEarnings"] = totalEarnings;
+
+  res.json(result);
+};
+
+export const getPreviousPaperbackRoyaltySummaryData = async (
+  req: Request,
+  res: Response
+) => {
+  const authorId = parseInt(req.body.authorId);
+  const copyrightOwner = parseInt(req.body.copyrightOwner);
+  const typeId = parseInt(req.body.typeId);
+  const type = req.body.type;
+  const result: any = {};
+  const royaltySummary: any = {};
+
+  let dates: any = {};
+  if (type === "year") {
+    dates = await prisma.site_config.findMany({
+      where: {
+        category: {
+          equals: "FY",
+        },
+      },
+    });
+  } else {
+    const fyYearKey = req.body.fyYearKey;
+    dates = await getMonthsForFy(fyYearKey);
+  }
+
+  let bookType: any = {};
+  if (typeId === 1) {
+    bookType = BOOK_TYPES[0];
+  } else {
+    bookType = BOOK_TYPES[1];
+  }
+
+  // Initializing variables
+
+  for (let i = 0; i < dates.length; i++) {
+    const fyData = dates[i];
+    const fyDates: string[] = fyData.value.split(",");
+    const startDate = new Date(fyDates[0]);
+    const endDateOld = new Date(fyDates[1]);
+    const endDate = new Date(
+      endDateOld.getTime() + Math.abs(endDateOld.getTimezoneOffset() * 60000)
+    );
+
+    const channelData: any = {};
+    channelData["total"] = 0;
+
+    let channelDataOrder = {
+      pustakaOnline: null,
+      pustakaWhatsapp: null,
+      pustakaBookFair: null,
+      amazon: null,
+      flipkart: null,
+      booksellers: null,
+      total: null,
+    };
+
+    for (let k = 0; k < PAPERBACK_BOOK_TYPES.length; k++) {
+      const bookTypeData = PAPERBACK_BOOK_TYPES[k];
+
+      // All
+      const paperbackEarnings = await prisma.author_transaction.aggregate({
+        _sum: {
+          book_final_royalty_value_inr: true,
+          converted_book_final_royalty_value_inr: true,
+        },
+        where: {
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          order_date: {
+            gte: startDate,
+            lte: endDate,
+          },
+          order_type: {
+            in: bookTypeData.id,
+          },
+        },
+      });
+
+      channelData[bookTypeData.name] =
+        (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
+        (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
+      channelData["total"] +=
+        (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
+        (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
+
+      // Calculating Paperback Data only after "FY 2023-24"
+      if (type === "year" && i >= 8) {
+        royaltySummary[fyData.key] = Object.assign(
+          channelDataOrder,
+          channelData
+        );
+      } else if (type === "month") {
+        royaltySummary[fyData.key] = Object.assign(
+          channelDataOrder,
+          channelData
+        );
+      }
+    }
+  }
+
+  result["data"] = royaltySummary;
+  result["names"] = [
+    "Pustaka (Online)",
+    "Pustaka (Whatsapp)",
+    "Pustaka (Book Fair)",
+    "Amazon",
+    "Flipkart",
+    "Pustaka (Booksellers)",
+    "Total",
+  ];
 
   // Calculating total earnings
   let totalEarnings = 0;
@@ -410,7 +512,6 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
   } else {
     const fyYearKey = req.body.fyYearKey;
     dates = await getMonthsForFy(fyYearKey);
-    console.log(dates);
   }
 
   for (let i = 0; i < dates.length; i++) {
@@ -1690,21 +1791,18 @@ export const preparePaperbackStockPagination = async (
   const copyrightOwner = parseInt(req.body.copyrightOwner);
   const limit = parseInt(req.body.limit);
 
-  const stockCount = await prisma.paperback_stock.groupBy({
-    by: ["book_id"],
-    _count: {
-      book_id: true,
-    },
+  const booksCount = await prisma.book_tbl.count({
     where: {
-      book: {
-        author_name: authorId,
-        copyright_owner: copyrightOwner,
-      },
+      author_name: authorId,
+      copyright_owner: copyrightOwner,
+      paper_back_flag: 1,
+      paper_back_readiness_flag: 1,
+      status: true,
     },
   });
 
-  result.totalPages = Math.floor(stockCount.length / limit) || 1;
-  result.totalBooks = stockCount.length;
+  result.totalPages = Math.floor(booksCount / limit) || 1;
+  result.totalBooks = booksCount;
 
   res.json(result);
 };
@@ -1720,16 +1818,18 @@ export const getPaginatedPaperbackStock = async (
 
   const result: any = [];
 
-  const bookIds = await prisma.paperback_stock.groupBy({
+  const bookIds = await prisma.book_tbl.findMany({
     skip: currentPage === 1 ? 0 : currentPage * limit,
     take: limit,
-    by: ["book_id"],
+    select: {
+      book_id: true,
+    },
     where: {
-      book: {
-        author_name: authorId,
-        copyright_owner: copyrightOwner,
-        status: true,
-      },
+      author_name: authorId,
+      copyright_owner: copyrightOwner,
+      paper_back_flag: 1,
+      paper_back_readiness_flag: 1,
+      status: true,
     },
     orderBy: {
       book_id: "desc",
@@ -1784,15 +1884,12 @@ export const getPaginatedPaperbackStock = async (
 export const getPaperbackStockDetails = async (req: Request, res: Response) => {
   const bookId = parseInt(req.body.bookId);
 
-  const stockDetails = await prisma.paperback_stock.findMany({
+  const stockDetails = await prisma.pustaka_paperback_stock_ledger.findMany({
     where: {
       book_id: bookId,
     },
-    select: {
-      last_update_date: true,
-      bookfair: true,
-      quantity: true,
-      stock_in_hand: true,
+    orderBy: {
+      transaction_date: "desc",
     },
   });
 

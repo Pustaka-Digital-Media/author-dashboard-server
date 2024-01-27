@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://pustakaprodv2:ebooks%23Pustaka@pustaka-prod-db-v2.cokqzfziewag.ap-south-1.rds.amazonaws.com:3306/pustaka_prod_v4"
+  url      = "mysql://root:Rohan2006*123@localhost:3306/pustaka"
 }
 
 model amazon_books {
@@ -322,19 +322,20 @@ model book_tbl {
   overdriveBookId overdrive_books?
   audibleBookId   audible_books?
 
-  giftBooks              author_gift_books[]
-  amazon_transactions    amazon_transactions?
-  audible_transactions   audible_transactions?
-  author_transaction     author_transaction?
-  google_transactions    google_transactions?
-  kobo_transaction       kobo_transaction?
-  overdrive_transactions overdrive_transactions?
-  scribd_transaction     scribd_transaction?
-  storytel_transactions  storytel_transactions?
-  pratilipi_books        pratilipi_books?
-  amazon_paperback_books amazon_paperback_books?
-  pod_bookfair           pod_bookfair?
-  paperback_stock        paperback_stock[]
+  giftBooks                      author_gift_books[]
+  amazon_transactions            amazon_transactions?
+  audible_transactions           audible_transactions?
+  author_transaction             author_transaction?
+  google_transactions            google_transactions?
+  kobo_transaction               kobo_transaction?
+  overdrive_transactions         overdrive_transactions?
+  scribd_transaction             scribd_transaction?
+  storytel_transactions          storytel_transactions?
+  pratilipi_books                pratilipi_books?
+  amazon_paperback_books         amazon_paperback_books?
+  pod_bookfair                   pod_bookfair?
+  paperback_stock                paperback_stock[]
+  pustaka_paperback_stock_ledger pustaka_paperback_stock_ledger[]
 }
 
 model book_types {
@@ -952,6 +953,21 @@ model publisher_tbl {
   status                  Int?
   created_at              DateTime? @default(now()) @db.Timestamp(0)
   tds_flag                Int?
+}
+
+model pustaka_paperback_stock_ledger {
+  id               Int      @id @default(autoincrement())
+  order_id         String?  @db.VarChar(45)
+  copyright_owner  Int
+  author_id        Int
+  description      String?  @db.VarChar(45)
+  channel_type     String?  @db.VarChar(10)
+  stock_in         Int
+  stock_out        Int
+  current_stock    Int
+  transaction_date DateTime @db.Date
+  book_id          Int
+  book             book_tbl @relation(fields: [book_id], references: [book_id])
 }
 
 model rating_review {
