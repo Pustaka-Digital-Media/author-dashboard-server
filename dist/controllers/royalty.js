@@ -63,9 +63,7 @@ const getRoyaltySummaryData = async (req, res) => {
         const endDateOld = new Date(fyDates[1]);
         const endDate = new Date(endDateOld.getTime() + Math.abs(endDateOld.getTimezoneOffset() * 60000));
         const channelData = {};
-        if (typeId !== 4) {
-            channelData["total"] = 0;
-        }
+        channelData["total"] = 0;
         let channelDataOrder = {};
         if (typeId === 1) {
             channelDataOrder = {
@@ -91,10 +89,26 @@ const getRoyaltySummaryData = async (req, res) => {
             };
         }
         else if (typeId === 4) {
-            channelDataOrder = {
-                consolidated: null,
-            };
+            if (type === "year") {
+                channelDataOrder = {
+                    consolidated: null,
+                };
+            }
+            else {
+                channelDataOrder = {
+                    consolidated: null,
+                    totalUnits: null,
+                };
+            }
         }
+        const prevMonthDate = await prisma.site_config.findFirst({
+            where: {
+                category: "prevmonth",
+            },
+        });
+        const prevMonthEnd = prevMonthDate && prevMonthDate.value
+            ? new Date(prevMonthDate.value)
+            : new Date();
         if (typeId !== 4) {
             {
                 const pustakaEarnings = await prisma.author_transaction.aggregate({
@@ -108,6 +122,7 @@ const getRoyaltySummaryData = async (req, res) => {
                         order_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                         order_type: {
                             in: bookType.id === 1
@@ -136,6 +151,7 @@ const getRoyaltySummaryData = async (req, res) => {
                         invoice_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                     },
                 });
@@ -154,6 +170,7 @@ const getRoyaltySummaryData = async (req, res) => {
                             transaction_date: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -173,6 +190,7 @@ const getRoyaltySummaryData = async (req, res) => {
                             Payout_month: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -188,6 +206,7 @@ const getRoyaltySummaryData = async (req, res) => {
                             transaction_date: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -203,6 +222,7 @@ const getRoyaltySummaryData = async (req, res) => {
                             transaction_date: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -221,6 +241,7 @@ const getRoyaltySummaryData = async (req, res) => {
                         transaction_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                         type_of_book: bookType.id,
                     },
@@ -239,6 +260,7 @@ const getRoyaltySummaryData = async (req, res) => {
                         transaction_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                         type_of_book: bookType.id,
                     },
@@ -257,6 +279,7 @@ const getRoyaltySummaryData = async (req, res) => {
                         transaction_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                         type_of_book: bookType.id,
                     },
@@ -286,6 +309,7 @@ const getRoyaltySummaryData = async (req, res) => {
                     order_date: {
                         gte: startDate,
                         lte: endDate,
+                        lt: prevMonthEnd,
                     },
                     order_type: {
                         equals: "15",
@@ -295,6 +319,66 @@ const getRoyaltySummaryData = async (req, res) => {
             channelData["consolidated"] =
                 (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
                     (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
+            if (type === "month") {
+                const totalStockOut = await prisma.pustaka_paperback_stock_ledger.aggregate({
+                    _sum: {
+                        stock_out: true,
+                    },
+                    where: {
+                        author_id: authorId,
+                        copyright_owner: copyrightOwner,
+                        transaction_date: {
+                            gte: startDate,
+                            lte: endDate,
+                            lt: prevMonthEnd,
+                        },
+                    },
+                });
+                const returnedStockIn = await prisma.pustaka_paperback_stock_ledger.aggregate({
+                    _sum: {
+                        stock_in: true,
+                    },
+                    where: {
+                        channel_type: {
+                            notIn: ["STK", "OST"],
+                        },
+                        author_id: authorId,
+                        copyright_owner: copyrightOwner,
+                        transaction_date: {
+                            gte: startDate,
+                            lte: endDate,
+                            lt: prevMonthEnd,
+                        },
+                    },
+                });
+                channelData["totalUnits"] =
+                    (totalStockOut._sum.stock_out || 0) -
+                        (returnedStockIn._sum.stock_in || 0);
+                channelData["total"] +=
+                    (paperbackEarnings._sum.book_final_royalty_value_inr || 0) +
+                        (paperbackEarnings._sum.converted_book_final_royalty_value_inr || 0);
+            }
+            else {
+                const totalRoyalty = await prisma.author_transaction.aggregate({
+                    _sum: {
+                        book_final_royalty_value_inr: true,
+                        converted_book_final_royalty_value_inr: true,
+                    },
+                    where: {
+                        author_id: authorId,
+                        copyright_owner: copyrightOwner,
+                        order_date: {
+                            lte: prevMonthEnd,
+                        },
+                        order_type: {
+                            in: ["7", "9", "10", "11", "12", "14", "15"],
+                        },
+                    },
+                });
+                channelData["total"] =
+                    (totalRoyalty._sum.book_final_royalty_value_inr || 0) +
+                        (totalRoyalty._sum.converted_book_final_royalty_value_inr || 0);
+            }
             if (type === "year" && i >= 9) {
                 royaltySummary[fyData.key] = Object.assign(channelDataOrder, channelData);
             }
@@ -328,7 +412,12 @@ const getRoyaltySummaryData = async (req, res) => {
         ];
     }
     else {
-        result["names"] = ["Consolidated Earnings"];
+        if (type === "year") {
+            result["names"] = ["Consolidated Earnings"];
+        }
+        else {
+            result["names"] = ["Consolidated Earnings", "Total Units Sold"];
+        }
     }
     let totalEarnings = 0;
     for (const fyYear in royaltySummary) {
@@ -359,13 +448,14 @@ const getPreviousPaperbackRoyaltySummaryData = async (req, res) => {
         const fyYearKey = req.body.fyYearKey;
         dates = await (0, getMonthsForFy_1.default)(fyYearKey);
     }
-    let bookType = {};
-    if (typeId === 1) {
-        bookType = globals_1.BOOK_TYPES[0];
-    }
-    else {
-        bookType = globals_1.BOOK_TYPES[1];
-    }
+    const prevMonthDate = await prisma.site_config.findFirst({
+        where: {
+            category: "prevmonth",
+        },
+    });
+    const prevMonthEnd = prevMonthDate && prevMonthDate.value
+        ? new Date(prevMonthDate.value)
+        : new Date();
     for (let i = 0; i < dates.length; i++) {
         const fyData = dates[i];
         const fyDates = fyData.value.split(",");
@@ -396,6 +486,7 @@ const getPreviousPaperbackRoyaltySummaryData = async (req, res) => {
                     order_date: {
                         gte: startDate,
                         lte: endDate,
+                        lt: prevMonthEnd,
                     },
                     order_type: {
                         in: bookTypeData.id,
@@ -454,6 +545,14 @@ const getAllChannelSummaryData = async (req, res) => {
         const fyYearKey = req.body.fyYearKey;
         dates = await (0, getMonthsForFy_1.default)(fyYearKey);
     }
+    const prevMonthDate = await prisma.site_config.findFirst({
+        where: {
+            category: "prevmonth",
+        },
+    });
+    const prevMonthEnd = prevMonthDate && prevMonthDate.value
+        ? new Date(prevMonthDate.value)
+        : new Date();
     for (let i = 0; i < dates.length; i++) {
         const channelData = {};
         channelData["ebooks"] = 0;
@@ -478,6 +577,7 @@ const getAllChannelSummaryData = async (req, res) => {
                         order_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                         order_type: {
                             in: bookType.id === 1 ? ["1", "2", "3"] : ["4", "5", "6", "8"],
@@ -502,6 +602,7 @@ const getAllChannelSummaryData = async (req, res) => {
                         transaction_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                         type_of_book: bookType.id,
                     },
@@ -520,6 +621,7 @@ const getAllChannelSummaryData = async (req, res) => {
                         transaction_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                         type_of_book: bookType.id,
                     },
@@ -538,6 +640,7 @@ const getAllChannelSummaryData = async (req, res) => {
                         transaction_date: {
                             gte: startDate,
                             lte: endDate,
+                            lt: prevMonthEnd,
                         },
                         type_of_book: bookType.id,
                     },
@@ -558,6 +661,7 @@ const getAllChannelSummaryData = async (req, res) => {
                             invoice_date: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -575,6 +679,7 @@ const getAllChannelSummaryData = async (req, res) => {
                             Payout_month: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -592,6 +697,7 @@ const getAllChannelSummaryData = async (req, res) => {
                             transaction_date: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -609,6 +715,7 @@ const getAllChannelSummaryData = async (req, res) => {
                             transaction_date: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -629,6 +736,7 @@ const getAllChannelSummaryData = async (req, res) => {
                             transaction_date: {
                                 gte: startDate,
                                 lte: endDate,
+                                lt: prevMonthEnd,
                             },
                         },
                     });
@@ -650,9 +758,10 @@ const getAllChannelSummaryData = async (req, res) => {
                     order_date: {
                         gte: startDate,
                         lte: endDate,
+                        lt: prevMonthEnd,
                     },
                     order_type: {
-                        in: ["7", "9", "10", "11", "12"],
+                        in: ["7", "9", "10", "11", "12", "14", "15"],
                     },
                 },
             });
@@ -1602,19 +1711,7 @@ const getPaginatedPaperbackStock = async (req, res) => {
                 },
             },
         });
-        const bookStock = await prisma.paperback_stock.findFirst({
-            where: {
-                book_id: book === null || book === void 0 ? void 0 : book.book_id,
-            },
-            select: {
-                stock_in_hand: true,
-            },
-            orderBy: {
-                id: "desc",
-            },
-        });
-        const bookMain = Object.assign(Object.assign({}, book), { stockInHand: bookStock === null || bookStock === void 0 ? void 0 : bookStock.stock_in_hand });
-        result.push(bookMain);
+        result.push(book);
     }
     res.json(result);
 };
