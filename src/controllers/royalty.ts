@@ -106,6 +106,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
             converted_book_final_royalty_value_inr: true,
           },
           where: {
+            pay_status: "O",
             author_id: authorId,
             copyright_owner: copyrightOwner,
             order_date: {
@@ -329,6 +330,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
           converted_book_final_royalty_value_inr: true,
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {
@@ -393,6 +395,7 @@ export const getRoyaltySummaryData = async (req: Request, res: Response) => {
             converted_book_final_royalty_value_inr: true,
           },
           where: {
+            pay_status: "O",
             author_id: authorId,
             copyright_owner: copyrightOwner,
             order_date: {
@@ -533,6 +536,7 @@ export const getPreviousPaperbackRoyaltySummaryData = async (
           converted_book_final_royalty_value_inr: true,
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {
@@ -645,6 +649,7 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
             converted_book_final_royalty_value_inr: true,
           },
           where: {
+            pay_status: "O",
             author_id: authorId,
             copyright_owner: copyrightOwner,
             order_date: {
@@ -858,6 +863,7 @@ export const getAllChannelSummaryData = async (req: Request, res: Response) => {
             converted_book_final_royalty_value_inr: true,
           },
           where: {
+            pay_status: "O",
             author_id: authorId,
             copyright_owner: copyrightOwner,
             order_date: {
@@ -950,6 +956,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           },
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {
@@ -1458,6 +1465,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           },
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {
@@ -1540,6 +1548,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           },
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {
@@ -1610,6 +1619,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           pay_status: true,
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {
@@ -1697,6 +1707,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           },
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {
@@ -1764,6 +1775,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           },
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {
@@ -1836,6 +1848,7 @@ export const getPaymentsForMonth = async (req: Request, res: Response) => {
           },
         },
         where: {
+          pay_status: "O",
           author_id: authorId,
           copyright_owner: copyrightOwner,
           order_date: {

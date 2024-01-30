@@ -117,6 +117,7 @@ const getRoyaltySummaryData = async (req, res) => {
                         converted_book_final_royalty_value_inr: true,
                     },
                     where: {
+                        pay_status: "O",
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         order_date: {
@@ -304,6 +305,7 @@ const getRoyaltySummaryData = async (req, res) => {
                     converted_book_final_royalty_value_inr: true,
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -365,6 +367,7 @@ const getRoyaltySummaryData = async (req, res) => {
                         converted_book_final_royalty_value_inr: true,
                     },
                     where: {
+                        pay_status: "O",
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         order_date: {
@@ -481,6 +484,7 @@ const getPreviousPaperbackRoyaltySummaryData = async (req, res) => {
                     converted_book_final_royalty_value_inr: true,
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -572,6 +576,7 @@ const getAllChannelSummaryData = async (req, res) => {
                         converted_book_final_royalty_value_inr: true,
                     },
                     where: {
+                        pay_status: "O",
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         order_date: {
@@ -753,6 +758,7 @@ const getAllChannelSummaryData = async (req, res) => {
                     converted_book_final_royalty_value_inr: true,
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -835,6 +841,7 @@ const getPaymentsForMonth = async (req, res) => {
                     },
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -1276,6 +1283,7 @@ const getPaymentsForMonth = async (req, res) => {
                     },
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -1345,6 +1353,7 @@ const getPaymentsForMonth = async (req, res) => {
                     },
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -1402,6 +1411,7 @@ const getPaymentsForMonth = async (req, res) => {
                     pay_status: true,
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -1478,6 +1488,7 @@ const getPaymentsForMonth = async (req, res) => {
                     },
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -1536,6 +1547,7 @@ const getPaymentsForMonth = async (req, res) => {
                     },
                 },
                 where: {
+                    pay_status: "O",
                     author_id: authorId,
                     copyright_owner: copyrightOwner,
                     order_date: {
@@ -1595,6 +1607,7 @@ const getPaymentsForMonth = async (req, res) => {
                 },
             },
             where: {
+                pay_status: "O",
                 author_id: authorId,
                 copyright_owner: copyrightOwner,
                 order_date: {
@@ -1649,11 +1662,6 @@ const preparePaperbackStockPagination = async (req, res) => {
     const authorId = parseInt(req.body.authorId);
     const copyrightOwner = parseInt(req.body.copyrightOwner);
     const limit = parseInt(req.body.limit);
-    const monthKey = req.body.monthKey;
-    const dateParse = await (0, getMonthsForFy_1.parseMonthString)(monthKey);
-    const fyDates = dateParse.split(",");
-    const startDate = new Date(fyDates[0]) || new Date("2014-01-01");
-    const endDate = new Date(fyDates[1]) || new Date();
     let booksCount = 0;
     const bookIds = await prisma.book_tbl.findMany({
         select: {
@@ -1680,10 +1688,6 @@ const preparePaperbackStockPagination = async (req, res) => {
                 author_id: authorId,
                 copyright_owner: copyrightOwner,
                 book_id: bookId,
-                transaction_date: {
-                    gte: startDate,
-                    lte: endDate,
-                },
             },
         });
         const returnedStockIn = await prisma.pustaka_paperback_stock_ledger.aggregate({
@@ -1697,10 +1701,6 @@ const preparePaperbackStockPagination = async (req, res) => {
                 author_id: authorId,
                 copyright_owner: copyrightOwner,
                 book_id: bookId,
-                transaction_date: {
-                    gte: startDate,
-                    lte: endDate,
-                },
             },
         });
         const totalUnits = (totalStockOut._sum.stock_out || 0) -
@@ -1719,11 +1719,6 @@ const getPaginatedPaperbackStock = async (req, res) => {
     const copyrightOwner = parseInt(req.body.copyrightOwner);
     const currentPage = parseInt(req.body.currentPage);
     const limit = parseInt(req.body.limit);
-    const monthKey = req.body.monthKey;
-    const dateParse = await (0, getMonthsForFy_1.parseMonthString)(monthKey);
-    const fyDates = dateParse.split(",");
-    const startDate = new Date(fyDates[0]) || new Date("2014-01-01");
-    const endDate = new Date(fyDates[1]) || new Date();
     const result = [];
     const bookIds = await prisma.book_tbl.findMany({
         skip: currentPage === 1 ? 0 : currentPage * limit,
@@ -1775,10 +1770,6 @@ const getPaginatedPaperbackStock = async (req, res) => {
                 author_id: authorId,
                 copyright_owner: copyrightOwner,
                 book_id: bookId,
-                transaction_date: {
-                    gte: startDate,
-                    lte: endDate,
-                },
             },
         });
         const returnedStockIn = await prisma.pustaka_paperback_stock_ledger.aggregate({
@@ -1792,10 +1783,6 @@ const getPaginatedPaperbackStock = async (req, res) => {
                 author_id: authorId,
                 copyright_owner: copyrightOwner,
                 book_id: bookId,
-                transaction_date: {
-                    gte: startDate,
-                    lte: endDate,
-                },
             },
         });
         const totalUnits = (totalStockOut._sum.stock_out || 0) -
