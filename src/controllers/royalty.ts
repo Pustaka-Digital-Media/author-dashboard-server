@@ -1906,12 +1906,6 @@ export const preparePaperbackStockPagination = async (
   const authorId = parseInt(req.body.authorId);
   const copyrightOwner = parseInt(req.body.copyrightOwner);
   const limit = parseInt(req.body.limit);
-  const monthKey = req.body.monthKey;
-
-  const dateParse = await parseMonthString(monthKey);
-  const fyDates = dateParse.split(",");
-  const startDate = new Date(fyDates[0]) || new Date("2014-01-01");
-  const endDate = new Date(fyDates[1]) || new Date();
 
   let booksCount = 0;
 
@@ -1943,10 +1937,6 @@ export const preparePaperbackStockPagination = async (
           author_id: authorId,
           copyright_owner: copyrightOwner,
           book_id: bookId,
-          transaction_date: {
-            gte: startDate,
-            lte: endDate,
-          },
         },
       }
     );
@@ -1962,10 +1952,6 @@ export const preparePaperbackStockPagination = async (
           author_id: authorId,
           copyright_owner: copyrightOwner,
           book_id: bookId,
-          transaction_date: {
-            gte: startDate,
-            lte: endDate,
-          },
         },
       });
 
@@ -1992,12 +1978,6 @@ export const getPaginatedPaperbackStock = async (
   const copyrightOwner = parseInt(req.body.copyrightOwner);
   const currentPage = parseInt(req.body.currentPage);
   const limit = parseInt(req.body.limit);
-  const monthKey = req.body.monthKey;
-
-  const dateParse = await parseMonthString(monthKey);
-  const fyDates = dateParse.split(",");
-  const startDate = new Date(fyDates[0]) || new Date("2014-01-01");
-  const endDate = new Date(fyDates[1]) || new Date();
 
   const result: any = [];
 
@@ -2054,10 +2034,6 @@ export const getPaginatedPaperbackStock = async (
           author_id: authorId,
           copyright_owner: copyrightOwner,
           book_id: bookId,
-          transaction_date: {
-            gte: startDate,
-            lte: endDate,
-          },
         },
       }
     );
@@ -2073,10 +2049,6 @@ export const getPaginatedPaperbackStock = async (
           author_id: authorId,
           copyright_owner: copyrightOwner,
           book_id: bookId,
-          transaction_date: {
-            gte: startDate,
-            lte: endDate,
-          },
         },
       });
 
