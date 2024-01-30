@@ -446,7 +446,7 @@ export const getTransactionStatusSummary = async (
           equals: transactionDetails.status,
         },
         order_type: {
-          in: ["7", "9", "10", "11", "14"],
+          in: ["7", "9", "10", "11", "12", "14", "15"],
         },
         order_date: {
           lt: prevMonthEnd,
