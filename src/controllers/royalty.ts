@@ -1906,8 +1906,19 @@ export const preparePaperbackStockPagination = async (
   const authorId = parseInt(req.body.authorId);
   const copyrightOwner = parseInt(req.body.copyrightOwner);
   const limit = parseInt(req.body.limit);
+  const monthKey = req.body.monthKey;
 
-  const booksCount = await prisma.book_tbl.count({
+  const dateParse = await parseMonthString(monthKey);
+  const fyDates = dateParse.split(",");
+  const startDate = new Date(fyDates[0]) || new Date("2014-01-01");
+  const endDate = new Date(fyDates[1]) || new Date();
+
+  let booksCount = 0;
+
+  const bookIds = await prisma.book_tbl.findMany({
+    select: {
+      book_id: true,
+    },
     where: {
       author_name: authorId,
       copyright_owner: copyrightOwner,
@@ -1915,7 +1926,57 @@ export const preparePaperbackStockPagination = async (
       paper_back_readiness_flag: 1,
       status: true,
     },
+    orderBy: {
+      book_id: "desc",
+    },
   });
+
+  for (let i = 0; i < bookIds.length; i++) {
+    let bookId = bookIds[i].book_id;
+
+    const totalStockOut = await prisma.pustaka_paperback_stock_ledger.aggregate(
+      {
+        _sum: {
+          stock_out: true,
+        },
+        where: {
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          book_id: bookId,
+          transaction_date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      }
+    );
+    const returnedStockIn =
+      await prisma.pustaka_paperback_stock_ledger.aggregate({
+        _sum: {
+          stock_in: true,
+        },
+        where: {
+          channel_type: {
+            notIn: ["STK", "OST"],
+          },
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          book_id: bookId,
+          transaction_date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      });
+
+    const totalUnits =
+      (totalStockOut._sum.stock_out || 0) -
+      (returnedStockIn._sum.stock_in || 0);
+
+    if (totalUnits > 0) {
+      booksCount += 1;
+    }
+  }
 
   result.totalPages = Math.floor(booksCount / limit) || 1;
   result.totalBooks = booksCount;
@@ -1931,6 +1992,12 @@ export const getPaginatedPaperbackStock = async (
   const copyrightOwner = parseInt(req.body.copyrightOwner);
   const currentPage = parseInt(req.body.currentPage);
   const limit = parseInt(req.body.limit);
+  const monthKey = req.body.monthKey;
+
+  const dateParse = await parseMonthString(monthKey);
+  const fyDates = dateParse.split(",");
+  const startDate = new Date(fyDates[0]) || new Date("2014-01-01");
+  const endDate = new Date(fyDates[1]) || new Date();
 
   const result: any = [];
 
@@ -1978,21 +2045,49 @@ export const getPaginatedPaperbackStock = async (
         },
       },
     });
-    // const bookStock = await prisma.paperback_stock.findFirst({
-    //   where: {
-    //     book_id: book?.book_id,
-    //   },
-    //   select: {
-    //     stock_in_hand: true,
-    //   },
-    //   orderBy: {
-    //     id: "desc",
-    //   },
-    // });
+    const totalStockOut = await prisma.pustaka_paperback_stock_ledger.aggregate(
+      {
+        _sum: {
+          stock_out: true,
+        },
+        where: {
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          book_id: bookId,
+          transaction_date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      }
+    );
+    const returnedStockIn =
+      await prisma.pustaka_paperback_stock_ledger.aggregate({
+        _sum: {
+          stock_in: true,
+        },
+        where: {
+          channel_type: {
+            notIn: ["STK", "OST"],
+          },
+          author_id: authorId,
+          copyright_owner: copyrightOwner,
+          book_id: bookId,
+          transaction_date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      });
 
-    // const bookMain = { ...book, stockInHand: bookStock?.stock_in_hand };
-    // result.push(bookMain);
-    result.push(book);
+    const totalUnits =
+      (totalStockOut._sum.stock_out || 0) -
+      (returnedStockIn._sum.stock_in || 0);
+
+    const bookMain = { ...book, totalUnits: totalUnits };
+    if (totalUnits > 0) {
+      result.push(bookMain);
+    }
   }
 
   res.json(result);
