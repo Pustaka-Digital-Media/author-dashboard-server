@@ -117,7 +117,6 @@ const getRoyaltySummaryData = async (req, res) => {
                         converted_book_final_royalty_value_inr: true,
                     },
                     where: {
-                        pay_status: "O",
                         author_id: authorId,
                         copyright_owner: copyrightOwner,
                         order_date: {
