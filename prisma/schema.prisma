@@ -336,6 +336,7 @@ model book_tbl {
   pod_bookfair                   pod_bookfair?
   paperback_stock                paperback_stock[]
   pustaka_paperback_stock_ledger pustaka_paperback_stock_ledger[]
+  kukufm_transactions            kukufm_transactions[]
 }
 
 model book_types {
@@ -630,6 +631,25 @@ model kobo_transaction {
   user_id                    Int
   copyright_owner            Int?
   status                     String   @db.VarChar(2)
+}
+
+model kukufm_transactions {
+  id                     Int       @id @default(autoincrement())
+  show_id                String    @db.VarChar(45)
+  show_name              String    @db.VarChar(45)
+  book_id                Int
+  book                   book_tbl  @relation(fields: [book_id], references: [book_id])
+  published_date         DateTime? @db.Date
+  content_earning_amount Int
+  language               String    @db.VarChar(45)
+  rev_share_percentage   Int
+  rev_share_amount       Int
+  final_royalty_value    Int
+  author_id              Int
+  language_id            Int
+  copyright_owner        Int
+  transaction_date       DateTime? @db.Date
+  status                 String    @db.VarChar(45)
 }
 
 model language_tbl {

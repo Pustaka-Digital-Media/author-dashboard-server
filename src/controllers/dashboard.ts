@@ -425,6 +425,9 @@ export const getTransactionStatusSummary = async (
         status: {
           equals: transactionDetails.status,
         },
+        Payout_month: {
+          lte: prevMonthEnd,
+        },
         copyright_owner: copyrightOwner,
         author_id: authorId,
       },
@@ -449,7 +452,7 @@ export const getTransactionStatusSummary = async (
           in: ["7", "9", "10", "11", "12", "14", "15"],
         },
         order_date: {
-          lt: prevMonthEnd,
+          lte: prevMonthEnd,
         },
         copyright_owner: copyrightOwner,
         author_id: authorId,
@@ -476,6 +479,9 @@ export const getTransactionStatusSummary = async (
             status: {
               equals: transactionDetails.status,
             },
+            transaction_date: {
+              lte: prevMonthEnd,
+            },
             copyright_owner: copyrightOwner,
             author_id: authorId,
           },
@@ -483,6 +489,55 @@ export const getTransactionStatusSummary = async (
 
         transactionData[transactionDetails.name]["audiobooks"] +=
           amountData._sum.final_royalty_value;
+      }
+      // Kukufm
+      // Amount Paid/Pending (Audio Books)
+      for (let i = 0; i < TRANSACTION_STATUS.length; i++) {
+        const transactionDetails = TRANSACTION_STATUS[i];
+        const amountData = await prisma.kukufm_transactions.aggregate({
+          _sum: {
+            final_royalty_value: true,
+          },
+          where: {
+            status: {
+              equals: transactionDetails.status,
+            },
+            transaction_date: {
+              lte: prevMonthEnd,
+            },
+            copyright_owner: copyrightOwner,
+            author_id: authorId,
+          },
+        });
+
+        transactionData[transactionDetails.name]["audiobooks"] +=
+          amountData._sum.final_royalty_value;
+      }
+      // Pustaka
+      // Amount Paid/Pending (Audio Books)
+      for (let i = 0; i < TRANSACTION_STATUS.length; i++) {
+        const transactionDetails = TRANSACTION_STATUS[i];
+        const amountData = await prisma.author_transaction.aggregate({
+          _sum: {
+            book_final_royalty_value_inr: true,
+          },
+          where: {
+            pay_status: {
+              equals: transactionDetails.status,
+            },
+            order_date: {
+              lte: prevMonthEnd,
+            },
+            order_type: {
+              in: ["4", "5", "6", "8"],
+            },
+            copyright_owner: copyrightOwner,
+            author_id: authorId,
+          },
+        });
+
+        transactionData[transactionDetails.name]["audiobooks"] +=
+          amountData._sum.book_final_royalty_value_inr;
       }
     } else {
       // Amazon
@@ -496,6 +551,9 @@ export const getTransactionStatusSummary = async (
           where: {
             status: {
               equals: transactionDetails.status === "O" ? "R" : "P",
+            },
+            invoice_date: {
+              lte: prevMonthEnd,
             },
             copyright_owner: copyrightOwner,
             author_id: authorId,
@@ -519,6 +577,9 @@ export const getTransactionStatusSummary = async (
           status: {
             equals: transactionDetails.status,
           },
+          transaction_date: {
+            lte: prevMonthEnd,
+          },
           type_of_book: bookType.id,
           copyright_owner: copyrightOwner,
           author_id: authorId,
@@ -540,6 +601,9 @@ export const getTransactionStatusSummary = async (
         where: {
           status: {
             equals: transactionDetails.status,
+          },
+          transaction_date: {
+            lte: prevMonthEnd,
           },
           type_of_book: bookType.id,
           copyright_owner: copyrightOwner,
@@ -563,6 +627,9 @@ export const getTransactionStatusSummary = async (
           status: {
             equals: transactionDetails.status,
           },
+          transaction_date: {
+            lte: prevMonthEnd,
+          },
           type_of_book: bookType.id,
           copyright_owner: copyrightOwner,
           author_id: authorId,
@@ -584,6 +651,9 @@ export const getTransactionStatusSummary = async (
         where: {
           status: {
             equals: transactionDetails.status,
+          },
+          transaction_date: {
+            lte: prevMonthEnd,
           },
           type_of_book: bookType.id,
           copyright_owner: copyrightOwner,

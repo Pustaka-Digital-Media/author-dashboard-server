@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 
+const leapYear = (year: number) => {
+  return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+};
+
 interface FyMonth {
   start: string;
   end: string;
@@ -47,7 +51,14 @@ const getMonthsForFy = async (fyYearKey: string) => {
   for (let i = 0; i < months.length; i++) {
     const monthData = months[i].split("-");
     const month = monthData[0];
-    const numberOfDays = monthData[1];
+
+    // Checking for leap year
+    let numberOfDays = monthData[1];
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    if (numberOfDays === "28" && leapYear(currentYear)) {
+      numberOfDays = "29";
+    }
 
     const dates: any = {};
 

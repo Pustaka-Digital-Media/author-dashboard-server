@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseMonthString = void 0;
 const client_1 = require("@prisma/client");
+const leapYear = (year) => {
+    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+};
 const prisma = new client_1.PrismaClient();
 const months = [
     "04-30",
@@ -38,7 +41,12 @@ const getMonthsForFy = async (fyYearKey) => {
     for (let i = 0; i < months.length; i++) {
         const monthData = months[i].split("-");
         const month = monthData[0];
-        const numberOfDays = monthData[1];
+        let numberOfDays = monthData[1];
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        if (numberOfDays === "28" && leapYear(currentYear)) {
+            numberOfDays = "29";
+        }
         const dates = {};
         if (i > 8) {
             dates.id = i;
