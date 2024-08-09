@@ -163,6 +163,13 @@ const getChannelBooks = async (req, res) => {
             globals_1.PUSTAKA_URL + "/home/author/" + (channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.url_name);
         booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
         booksData["audiobooks"]["total"] += pustakaAudiobooksCount;
+        booksData["audiobooks"]["pratilipiFM"] = {};
+        booksData["audiobooks"]["pratilipiFM"]["name"] = "Pratilipi FM";
+        booksData["audiobooks"]["pratilipiFM"]["count"] = 0;
+        booksData["audiobooks"]["pratilipiFM"]["image_url"] =
+            globals_1.S3_URL + "/pratilipi-icon.png";
+        booksData["audiobooks"]["pratilipiFM"]["url"] =
+            channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.pratilipi_link;
     }
     if (includeTypes.includes(4)) {
         const paperbackCount = await prisma.book_tbl.count({
