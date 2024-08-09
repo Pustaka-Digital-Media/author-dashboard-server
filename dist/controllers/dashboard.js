@@ -135,6 +135,17 @@ const getChannelBooks = async (req, res) => {
         booksData["ebooks"]["scribd"]["url"] = channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.scribd_link;
         booksData["ebooks"]["scribd"]["count"] = scribdBooksCount;
         booksData["ebooks"]["total"] += scribdBooksCount;
+        const pratilipiBooksCount = await prisma.pratilipi_books.count({
+            where: {
+                author_id: authorId,
+            },
+        });
+        booksData["ebooks"]["pratilipi"] = {};
+        booksData["ebooks"]["pratilipi"]["name"] = "Pratilipi";
+        booksData["ebooks"]["pratilipi"]["count"] = pratilipiBooksCount;
+        booksData["ebooks"]["pratilipi"]["image_url"] =
+            globals_1.S3_URL + "/pratilipi-icon.png";
+        booksData["ebooks"]["pratilipi"]["url"] = channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.pratilipi_link;
     }
     if (includeTypes.includes(3)) {
         const pustakaAudiobooksCount = await prisma.book_tbl.count({
@@ -152,13 +163,6 @@ const getChannelBooks = async (req, res) => {
             globals_1.PUSTAKA_URL + "/home/author/" + (channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.url_name);
         booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
         booksData["audiobooks"]["total"] += pustakaAudiobooksCount;
-        booksData["audiobooks"]["pratilipiFM"] = {};
-        booksData["audiobooks"]["pratilipiFM"]["name"] = "Pratilipi FM";
-        booksData["audiobooks"]["pratilipiFM"]["count"] = 0;
-        booksData["audiobooks"]["pratilipiFM"]["image_url"] =
-            globals_1.S3_URL + "/pratilipi-icon.png";
-        booksData["audiobooks"]["pratilipiFM"]["url"] =
-            channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.pratilipi_link;
     }
     if (includeTypes.includes(4)) {
         const paperbackCount = await prisma.book_tbl.count({

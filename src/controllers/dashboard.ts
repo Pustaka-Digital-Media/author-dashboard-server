@@ -195,13 +195,13 @@ export const getChannelBooks = async (req: Request, res: Response) => {
     booksData["audiobooks"]["pustaka"]["count"] = pustakaAudiobooksCount;
     booksData["audiobooks"]["total"] += pustakaAudiobooksCount;
 
-    // booksData["audiobooks"]["pratilipiFM"] = {};
-    // booksData["audiobooks"]["pratilipiFM"]["name"] = "Pratilipi FM";
-    // booksData["audiobooks"]["pratilipiFM"]["count"] = 0;
-    // booksData["audiobooks"]["pratilipiFM"]["image_url"] =
-    //   S3_URL + "/pratilipi-icon.png";
-    // booksData["audiobooks"]["pratilipiFM"]["url"] =
-    //   channelLinks?.pratilipi_link;
+    booksData["audiobooks"]["pratilipiFM"] = {};
+    booksData["audiobooks"]["pratilipiFM"]["name"] = "Pratilipi FM";
+    booksData["audiobooks"]["pratilipiFM"]["count"] = 0;
+    booksData["audiobooks"]["pratilipiFM"]["image_url"] =
+      S3_URL + "/pratilipi-icon.png";
+    booksData["audiobooks"]["pratilipiFM"]["url"] =
+      channelLinks?.pratilipi_link;
   }
 
   if (includeTypes.includes(4)) {
