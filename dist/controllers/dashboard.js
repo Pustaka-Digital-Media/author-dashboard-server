@@ -135,17 +135,6 @@ const getChannelBooks = async (req, res) => {
         booksData["ebooks"]["scribd"]["url"] = channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.scribd_link;
         booksData["ebooks"]["scribd"]["count"] = scribdBooksCount;
         booksData["ebooks"]["total"] += scribdBooksCount;
-        const pratilipiBooksCount = await prisma.pratilipi_books.count({
-            where: {
-                author_id: authorId,
-            },
-        });
-        booksData["ebooks"]["pratilipi"] = {};
-        booksData["ebooks"]["pratilipi"]["name"] = "Pratilipi";
-        booksData["ebooks"]["pratilipi"]["count"] = pratilipiBooksCount;
-        booksData["ebooks"]["pratilipi"]["image_url"] =
-            globals_1.S3_URL + "/pratilipi-icon.png";
-        booksData["ebooks"]["pratilipi"]["url"] = channelLinks === null || channelLinks === void 0 ? void 0 : channelLinks.pratilipi_link;
     }
     if (includeTypes.includes(3)) {
         const pustakaAudiobooksCount = await prisma.book_tbl.count({
