@@ -1,6 +1,6 @@
 import express, { Express } from "express";
 import dotenv from "dotenv";
-import cors from "cors";
+import morgan from "morgan";
 
 import fs from "fs";
 import path from "path";
@@ -20,13 +20,13 @@ const app: Express = express();
 const port = process.env.PORT;
 
 app.use(express.json());
-app.use(cors());
+app.use(morgan("dev"));
 
 app.use(function (req, res, next) {
   // CORS headers
-  res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-  // Set custom headers for CORS
+
   res.header(
     "Access-Control-Allow-Headers",
     "Content-type,Accept,X-Custom-Header"
